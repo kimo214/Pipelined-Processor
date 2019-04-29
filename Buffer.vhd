@@ -22,6 +22,8 @@ ENTITY BUF IS
 ---- For Channel 1 -> ALU 1
         NOP1_IN                           	: IN STD_LOGIC;
 	Taken1_IN				: IN STD_LOGIC;                              -- For Branch instructions = 1 if taken
+	SET_Carry1_IN				: IN STD_LOGIC;
+	CLR_Carry1_IN				: IN STD_LOGIC;
         ALU1_OP_Code_IN   			: IN STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
         ALU1_Operand1_IN                        : IN STD_LOGIC_VECTOR  (31 DOWNTO 0);
         ALU1_Operand2_IN                        : IN STD_LOGIC_VECTOR  (31 DOWNTO 0);
@@ -32,7 +34,9 @@ ENTITY BUF IS
 ---- For Channel 2 -> ALU 2
         NOP2_IN                                 : IN STD_LOGIC;
 	Taken2_IN				: IN STD_LOGIC;				     -- For Branch instructions = 1 if taken
-        ALU2_OP_Code_IN   			: IN STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
+        SET_Carry2_IN				: IN STD_LOGIC;
+	CLR_Carry2_IN				: IN STD_LOGIC;
+	ALU2_OP_Code_IN   			: IN STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
         ALU2_Operand1_IN                        : IN STD_LOGIC_VECTOR  (31 DOWNTO 0);
         ALU2_Operand2_IN                        : IN STD_LOGIC_VECTOR  (31 DOWNTO 0);
 	Two_Operand_Instr2_Flag_IN              : IN STD_LOGIC;                              -- is Instruction has 2 Opernad or not
@@ -85,7 +89,9 @@ ENTITY BUF IS
 ---- For Channel 1 -> ALU 1
         NOP1_OUT                           	: OUT STD_LOGIC;
 	Taken1_OUT				: OUT STD_LOGIC;                              -- For Branch instructions = 1 if taken
-        ALU1_OP_Code_OUT   			: OUT STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
+        SET_Carry1_OUT				: OUT STD_LOGIC;
+	CLR_Carry1_OUT				: OUT STD_LOGIC;
+	ALU1_OP_Code_OUT   			: OUT STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
         ALU1_Operand1_OUT                       : OUT STD_LOGIC_VECTOR  (31 DOWNTO 0);
         ALU1_Operand2_OUT                       : OUT STD_LOGIC_VECTOR  (31 DOWNTO 0);
 	Two_Operand_Instr1_Flag_OUT             : OUT STD_LOGIC;                              -- is Instruction has 2 Opernad or not
@@ -95,6 +101,8 @@ ENTITY BUF IS
 ---- For Channel 2 -> ALU 2
         NOP2_OUT                                : OUT STD_LOGIC;
 	Taken2_OUT				: OUT STD_LOGIC;		    	      -- For Branch instructions = 1 if taken
+	SET_Carry2_OUT				: OUT STD_LOGIC;
+	CLR_Carry2_OUT				: OUT STD_LOGIC;
         ALU2_OP_Code_OUT   			: OUT STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
         ALU2_Operand1_OUT                       : OUT STD_LOGIC_VECTOR  (31 DOWNTO 0);
         ALU2_Operand2_OUT                       : OUT STD_LOGIC_VECTOR  (31 DOWNTO 0);
@@ -166,6 +174,12 @@ ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', NOP1_IN, NOP1_OUT );
 Taken1_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Taken1_IN, Taken1_OUT );
 
+SET_Carry1_FF:
+ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', SET_Carry1_IN, SET_Carry1_OUT );
+
+CLR_Carry1_FF:
+ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', CLR_Carry1_IN, CLR_Carry1_OUT );
+
 ALU1_OP_CODE_REG:
 ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', ALU1_OP_Code_IN, ALU1_OP_Code_OUT );
 
@@ -191,6 +205,12 @@ ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', NOP2_IN, NOP2_OUT );
 
 Taken2_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Taken2_IN, Taken2_OUT );
+
+SET_Carry2_FF:
+ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', SET_Carry2_IN, SET_Carry2_OUT );
+
+CLR_Carry2_FF:
+ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', CLR_Carry2_IN, CLR_Carry2_OUT );
 
 ALU2_OP_CODE_REG:
 ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', ALU2_OP_Code_IN, ALU2_OP_Code_OUT );
