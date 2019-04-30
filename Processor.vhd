@@ -309,7 +309,7 @@ signal Write1_Execute_out, Write2_Execute_out                               : st
 BEGIN
 
 --==========================================================
-PC_Adder:
+PC_Adder:-- For incrementing PC .. PC + 2 
 ENTITY work.my_nadder
 GENERIC MAP(n => 32)
 PORT MAP(
@@ -324,36 +324,36 @@ Program_Counter_Register:
 ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
-	CLK  => CLK,
-	RST  => RST,
-	EN   => '1',           
-	Din  => PC_Register_IN,
+	Reg_CLK  => CLK,
+	Reg_RST  => RST,
+	EN       => '1',           
+	Din      => PC_Register_IN,
 
-	Dout => PC_Register_OUT
+	Dout     => PC_Register_OUT
 );
 
 Stack_Pointer_Register:
 ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
-	CLK  => CLK,
-	RST  => RST,
-	EN   => '1',          
-	Din  => SP_Register_IN,
+	Reg_CLK  => CLK,
+	Reg_RST  => RST,
+	EN       => '1',          
+	Din      => SP_Register_IN,
 
-	Dout => SP_Register_OUT
+	Dout     => SP_Register_OUT
 );
 
 Flag_Register:
 ENTITY work.Register_Falling
 GENERIC MAP(n => 3)
 PORT MAP(
-	CLK  => CLK,
-	RST  => RST,
-	EN   => '1',          
-	Din  => Flag_Register_IN,
+	Reg_CLK  => CLK,
+	Reg_RST  => RST,
+	EN       => '1',          
+	Din      => Flag_Register_IN,
 
-	Dout => Flag_Register_OUT
+	Dout     => Flag_Register_OUT
 );
 --=============================================================
 --===================== Fetch Stage ===========================
@@ -447,7 +447,7 @@ PORT MAP(
         IR2_OUT        => IR2_FD_out,
         PC_OUT         => PC_FD_out,   --- OLD PC
         SP_OUT         => SP_FD_out,   --- OLD SP
-        Flags_OUT      => Flag_Register_OUT,
+        Flags_OUT      => Flags_FD_out,
 
 ----------------------------------------------------------------
         NOP1_OUT                    => NOP1_FD_out,
