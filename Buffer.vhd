@@ -15,7 +15,7 @@ ENTITY BUF IS
 	IR2_IN         				: IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
         PC_IN             			: IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
         SP_IN             			: IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
-        Flags_IN          			: IN  STD_LOGIC_VECTOR (3 DOWNTO 0);
+        Flags_IN          			: IN  STD_LOGIC_VECTOR (2 DOWNTO 0);
 
 -------------------------------------------------------------------------------- ID/EX
 
@@ -82,7 +82,7 @@ ENTITY BUF IS
 	IR2_OUT         			: OUT  STD_LOGIC_VECTOR(15 DOWNTO 0);
         PC_OUT             			: OUT  STD_LOGIC_VECTOR(31 DOWNTO 0);
         SP_OUT             			: OUT  STD_LOGIC_VECTOR(31 DOWNTO 0);
-        Flags_OUT          			: OUT  STD_LOGIC_VECTOR (3 DOWNTO 0);
+        Flags_OUT          			: OUT  STD_LOGIC_VECTOR (2 DOWNTO 0);
 
 -------------------------------------------------------------------------------- ID/EX
 
