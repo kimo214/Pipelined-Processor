@@ -302,5 +302,4 @@ ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Enable_Reg2_IN, Enable_Re
 Mem_or_ALU2_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Mem_or_ALU2_IN, Mem_or_ALU2_OUT );
 
-
 END ARCHITECTURE;
