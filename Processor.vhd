@@ -132,7 +132,7 @@ signal	IR1_DE_out, IR2_DE_out       		                                :  STD_LOG
 	    
 signal	PC_DE_out, SP_DE_out            		                        	:  STD_LOGIC_VECTOR(31 DOWNTO 0);
                     			
-signal	Flags_DE_out          		                                	    :  STD_LOGIC_VECTOR (3 DOWNTO 0);
+signal	Flags_DE_out          		                                	    :  STD_LOGIC_VECTOR (2 DOWNTO 0);
 
 ---- For Channel 1 -> ALU 1
         
@@ -190,7 +190,7 @@ signal	IR1_EM_out, IR2_EM_out       		                                :  STD_LOG
 	    
 signal	PC_EM_out, SP_EM_out            		                        	:  STD_LOGIC_VECTOR(31 DOWNTO 0);
                     			
-signal	Flags_EM_out          		                                	    :  STD_LOGIC_VECTOR (3 DOWNTO 0);
+signal	Flags_EM_out          		                                	    :  STD_LOGIC_VECTOR (2 DOWNTO 0);
 
 ---- For Channel 1 -> ALU 1
         
@@ -247,7 +247,7 @@ signal	IR1_MW_out, IR2_MW_out       		                                :  STD_LOG
 	    
 signal	PC_MW_out, SP_MW_out            		                        	:  STD_LOGIC_VECTOR(31 DOWNTO 0);
                     			
-signal	Flags_MW_out          		                                	    :  STD_LOGIC_VECTOR (3 DOWNTO 0);
+signal	Flags_MW_out          		                                	    :  STD_LOGIC_VECTOR (2 DOWNTO 0);
 
 ---- For Channel 1 -> ALU 1
         
