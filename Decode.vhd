@@ -8,10 +8,10 @@ ENTITY Decode IS
 
 -------------------------------------  Input Bits  ----------------------------------------
             CLK,RST                             : IN  STD_LOGIC;                                                                          
-            IR1_IN         		        : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-            IR2_IN         			: IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-            PC_IN             			: IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
-            SP_IN             			: IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
+            IR1_IN         		                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+            IR2_IN         			            : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+            PC_IN             			        : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
+            SP_IN             			        : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
             Flag_Register                       : IN  STD_LOGIC_VECTOR( 2 DOWNTO 0);
             Reg1                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             Reg2                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -28,7 +28,7 @@ ENTITY Decode IS
     
     ---- For Channel 1 -> ALU 1
             NOP1_OUT                            : OUT STD_LOGIC;
-            Taken1_OUT			        : OUT STD_LOGIC;                              -- For Branch instructions = 1 if taken
+            Taken1_OUT			                : OUT STD_LOGIC;                              -- For Branch instructions = 1 if taken
             ALU1_OP_Code_OUT                    : OUT STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
             ALU1_Operand1_OUT                   : OUT STD_LOGIC_VECTOR  (31 DOWNTO 0);
             ALU1_Operand2_OUT                   : OUT STD_LOGIC_VECTOR  (31 DOWNTO 0);
@@ -38,8 +38,8 @@ ENTITY Decode IS
 
     ---- For Channel 2 -> ALU 2
             NOP2_OUT                            : OUT STD_LOGIC;
-            Taken2_OUT				: OUT STD_LOGIC;		    	              -- For Branch instructions = 1 if taken
-            ALU2_OP_Code_OUT   			: OUT STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
+            Taken2_OUT				            : OUT STD_LOGIC;		    	              -- For Branch instructions = 1 if taken
+            ALU2_OP_Code_OUT   			        : OUT STD_LOGIC_VECTOR  (2 DOWNTO 0);         -- Add or Sub or Shift ...
             ALU2_Operand1_OUT                   : OUT STD_LOGIC_VECTOR  (31 DOWNTO 0);
             ALU2_Operand2_OUT                   : OUT STD_LOGIC_VECTOR  (31 DOWNTO 0);
             Two_Operand_Instr2_Flag_OUT         : OUT STD_LOGIC;                              -- is Instruction has 2 Opernad or not
@@ -47,35 +47,35 @@ ENTITY Decode IS
             SETC2,CLRC2                         : OUT STD_LOGIC;
     -------------------------------------------------------------------------------- EX/MEM
     ---- For Channel 1
-            Memory_Read1_OUT	           	: OUT STD_LOGIC;
-            Memory_Write1_OUT			: OUT STD_LOGIC;
+            Memory_Read1_OUT	           	    : OUT STD_LOGIC;
+            Memory_Write1_OUT			        : OUT STD_LOGIC;
             ALU_As_Address1_OUT	                : OUT STD_LOGIC;                              -- Take the Output of the ALU as address (pop instruction)
-            SP_As_Address1_OUT		    	: OUT STD_LOGIC;                              -- Take original SP as address (Push Instruction)
-            PC_As_Data1_OUT				            : OUT STD_LOGIC;			                  -- Use PC as Data to memory (Call instruction)
+            SP_As_Address1_OUT		    	    : OUT STD_LOGIC;                              -- Take original SP as address (Push Instruction)
+            PC_As_Data1_OUT				        : OUT STD_LOGIC;			                  -- Use PC as Data to memory (Call instruction)
     
     ---- For Channel 2
             Memory_Read2_OUT  	                : OUT STD_LOGIC;
             Memory_Write2_OUT                   : OUT STD_LOGIC;
-            ALU_As_Address2_OUT		        : OUT STD_LOGIC;                              -- Take the Output of the ALU as address (pop instruction)
-            SP_As_Address2_OUT		        : OUT STD_LOGIC;                              -- Take original SP as address (Push Instruction)
-            PC_As_Data2_OUT	                : OUT STD_LOGIC;			                  -- Use PC as Data to memry (Call instruction)
+            ALU_As_Address2_OUT		            : OUT STD_LOGIC;                              -- Take the Output of the ALU as address (pop instruction)
+            SP_As_Address2_OUT		            : OUT STD_LOGIC;                              -- Take original SP as address (Push Instruction)
+            PC_As_Data2_OUT	                    : OUT STD_LOGIC;			                  -- Use PC as Data to memry (Call instruction)
     
-            Memory_Result_OUT	        	: OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
+            Memory_Result_OUT	        	    : OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
     
     --------------------------------------------------------------------------------- MEM/WB
     ---- For Channel 1
-            Rsrc_Idx1_OUT	          	: OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-            Rdst_Idx1_OUT	                : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-            Enable_SP1_OUT			: OUT STD_LOGIC;                              -- To write in SP the ALU1 value	
-            Enable_Reg1_OUT	                : OUT STD_LOGIC;			                  -- To Know if it will write to a general register
-            Mem_or_ALU1_OUT			: OUT STD_LOGIC;                              -- To know which value to write (Memory or ALU 1)
+            Rsrc_Idx1_OUT	          	        : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+            Rdst_Idx1_OUT	                    : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+            Enable_SP1_OUT			            : OUT STD_LOGIC;                              -- To write in SP the ALU1 value	
+            Enable_Reg1_OUT	                    : OUT STD_LOGIC;			                  -- To Know if it will write to a general register
+            Mem_or_ALU1_OUT			            : OUT STD_LOGIC;                              -- To know which value to write (Memory or ALU 1)
         
         ---- For Channel 2
-            Rsrc_Idx2_OUT			: OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-            Rdst_Idx2_OUT			: OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
-            Enable_SP2_OUT			: OUT STD_LOGIC;                              -- To write in SP the ALU2 value	
-            Enable_Reg2_OUT	                : OUT STD_LOGIC;			                  -- To Know if it will write to a general register
-            Mem_or_ALU2_OUT			: OUT STD_LOGIC                               -- To know which value to write (Memory or ALU 2)
+            Rsrc_Idx2_OUT			            : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+            Rdst_Idx2_OUT			            : OUT STD_LOGIC_VECTOR (2 DOWNTO 0);
+            Enable_SP2_OUT			            : OUT STD_LOGIC;                              -- To write in SP the ALU2 value	
+            Enable_Reg2_OUT	                    : OUT STD_LOGIC;			                  -- To Know if it will write to a general register
+            Mem_or_ALU2_OUT			            : OUT STD_LOGIC                               -- To know which value to write (Memory or ALU 2)
             
     );
 END ENTITY;
