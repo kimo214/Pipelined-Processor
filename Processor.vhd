@@ -515,18 +515,18 @@ PORT MAP(
             EXT_CLK                             => CLK,
             EXT_RST                             => RST,                                        
             IR1_IN                              => IR1_FD_out,
-            IR2_IN                              => IR2_FD_out
+            IR2_IN                              => IR2_FD_out,
             PC_IN             	                => PC_FD_out,
             SP_IN             			=> SP_FD_out,
             Flag_Register                       => Flags_FD_out,
-            Reg1                                => Reg
-            Reg2                                =>
-            Reg3                                =>
-            Reg4                                =>
-            Reg5                                =>
-            Reg6                                =>
-            Reg7                                =>
-            Reg8                                =>
+            Reg1                                => IR1_FD_out,
+            Reg2                                => IR1_FD_out,
+            Reg3                                => IR1_FD_out,
+            Reg4                                => IR1_FD_out,
+            Reg5                                => IR1_FD_out,
+            Reg6                                => IR1_FD_out,
+            Reg7                                => IR1_FD_out,
+            Reg8                                => IR1_FD_out,
 
 --------------------------------------------------------------------------------------
 
@@ -583,7 +583,7 @@ PORT MAP(
             Rdst_Idx2_OUT	                   => Rdst_Idx2_Decode_out,  
             Enable_SP2_OUT			   => Enable_SP2_Decode_out,                                
             Enable_Reg2_OUT	                   => Enable_Reg2_Decode_out,  			               
-            Mem_or_ALU2_OUT			   => Mem_or_ALU2_Decode_out,
+            Mem_or_ALU2_OUT			   => Mem_or_ALU2_Decode_out
     
 );
 
@@ -647,6 +647,7 @@ PORT MAP(
         SP_As_Address2_IN  => SP_As_Address2_Decode_out,
         PC_As_Data2_IN => PC_As_Data2_Decode_out,
 
+        Memory_Result_IN => (others => '0'),
 -----------------------------------------------------------
 
         Rsrc_Idx1_IN   => Rsrc_Idx1_Decode_out,

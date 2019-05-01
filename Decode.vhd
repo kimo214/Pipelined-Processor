@@ -99,10 +99,10 @@ BEGIN
     registerfile(6)<=reg7;
     registerfile(7)<=reg8;
  
-    PROCESS(CLK, RST)
+    PROCESS(EXT_CLK, EXT_RST)
     
     BEGIN
-    IF RISING_EDGE(CLK) THEN
+    IF RISING_EDGE(EXT_CLK) THEN
 
 
     ---------------------------------------------------------------------------------------------------------------
