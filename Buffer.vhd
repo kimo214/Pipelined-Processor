@@ -58,7 +58,7 @@ ENTITY BUF IS
 	SP_As_Address2_IN			: IN STD_LOGIC;                              -- Take original SP as address (Push Instruction)
 	PC_As_Data2_IN				: IN STD_LOGIC;				     -- Use PC as data to write in memory (Call Instruction)	
 
-	Memory_Result_IN	        	: IN STD_LOGIC_VECTOR (15 DOWNTO 0);
+	Memory_Result_IN	        	: IN STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 --------------------------------------------------------------------------------- MEM/WB
 ---- For Channel 1
@@ -125,7 +125,7 @@ ENTITY BUF IS
 	SP_As_Address2_OUT			: OUT STD_LOGIC;                              -- Take original SP as address (Push Instruction)
 	PC_As_Data2_OUT				: OUT STD_LOGIC;			      -- Use PC as Data to memry (Call instruction)
 
-	Memory_Result_OUT	        	: OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
+	Memory_Result_OUT	        	: OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 --------------------------------------------------------------------------------- MEM/WB
 ---- For Channel 1
@@ -266,7 +266,7 @@ ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', PC_As_Data2_IN, PC_As_Dat
 
 
 MEM_RES_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 16) PORT MAP( EXT_CLK, EXT_RST, '1', Memory_Result_IN, Memory_Result_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', Memory_Result_IN, Memory_Result_OUT );
 
 ---------------------------------------------------------------------------------------------------------------------------
 

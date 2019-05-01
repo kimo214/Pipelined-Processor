@@ -60,7 +60,7 @@ ENTITY Decode IS
             SP_As_Address2_OUT		            : OUT STD_LOGIC;                              -- Take original SP as address (Push Instruction)
             PC_As_Data2_OUT	                    : OUT STD_LOGIC;			                  -- Use PC as Data to memry (Call instruction)
     
-            Memory_Result_OUT	        	    : OUT STD_LOGIC_VECTOR (15 DOWNTO 0);
+            Memory_Result_OUT	        	    : OUT STD_LOGIC_VECTOR (31 DOWNTO 0);
     
     --------------------------------------------------------------------------------- MEM/WB
     ---- For Channel 1
