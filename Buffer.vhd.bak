@@ -164,7 +164,7 @@ SP_REG:
 ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', SP_IN, SP_OUT );
 
 FLAG_REG:
-ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', Flags_IN, Flags_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n =>  4) PORT MAP( EXT_CLK, EXT_RST, '1', Flags_IN, Flags_OUT );
 
 ---------------------------------------------------------------------------------------------------------------------------
 
