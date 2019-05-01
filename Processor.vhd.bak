@@ -917,8 +917,8 @@ PORT MAP(
         PC                => PC_EM_out,
         SP                => SP_EM_out,
 
-        Rsrc1             => ALU1_Operand1_EM_out,
-        Rdst1             => ALU1_Operand2_EM_out,
+        Rsrc1             => ALU1_Operand1_EM_out(15 DOWNTO 0),
+        Rdst1             => ALU1_Operand2_EM_out(15 DOWNTO 0),
 
         Read_Enable1      => Memory_Read1_EM_out,
         Write_Enable1     => Memory_Write1_EM_out,
@@ -1108,7 +1108,7 @@ PORT MAP(
 --=============================================================
 
 RegisterFile:
-ENTITY work.RegisterFile
+ENTITY work.Register_File
 GENERIC MAP(n => 16)
 PORT MAP(
 	Reg_CLK         => CLK,

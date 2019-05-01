@@ -917,8 +917,8 @@ PORT MAP(
         PC                => PC_EM_out,
         SP                => SP_EM_out,
 
-        Rsrc1             => ALU1_Operand1_EM_out,
-        Rdst1             => ALU1_Operand2_EM_out,
+        Rsrc1             => ALU1_Operand1_EM_out(15 DOWNTO 0),
+        Rdst1             => ALU1_Operand2_EM_out(15 DOWNTO 0),
 
         Read_Enable1      => Memory_Read1_EM_out,
         Write_Enable1     => Memory_Write1_EM_out,
@@ -928,8 +928,8 @@ PORT MAP(
 
         ALU1_OUT          => ALU1_Result_EM_out,
 ---------------------------------------------------------------
-        Rsrc2             => ALU2_Operand1_EM_out,
-        Rdst2             => ALU2_Operand2_EM_out,
+        Rsrc2             => ALU2_Operand1_EM_out(15 DOWNTO 0),
+        Rdst2             => ALU2_Operand2_EM_out(15 DOWNTO 0),
 
         Read_Enable2      => Memory_Read2_EM_out,
         Write_Enable2     => Memory_Write2_EM_out,
