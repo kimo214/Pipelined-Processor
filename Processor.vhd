@@ -20,6 +20,14 @@ SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_IN     : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_OUT    : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 
+SIGNAL Register1_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register2_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register3_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register4_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register5_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register6_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register7_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register8_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 --------------------------------------------  FETCH TO BUFFER  ----------------------------------------------
 
 signal IR1_Fetch_out, IR2_Fetch_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -519,14 +527,14 @@ PORT MAP(
             PC_IN             	                => PC_FD_out,
             SP_IN             			=> SP_FD_out,
             Flag_Register                       => Flags_FD_out,
-            Reg1                                => IR1_FD_out,
-            Reg2                                => IR1_FD_out,
-            Reg3                                => IR1_FD_out,
-            Reg4                                => IR1_FD_out,
-            Reg5                                => IR1_FD_out,
-            Reg6                                => IR1_FD_out,
-            Reg7                                => IR1_FD_out,
-            Reg8                                => IR1_FD_out,
+            Reg1                                => Register1_OUTPUT,
+            Reg2                                => Register2_OUTPUT,
+            Reg3                                => Register3_OUTPUT,
+            Reg4                                => Register4_OUTPUT,
+            Reg5                                => Register5_OUTPUT,
+            Reg6                                => Register6_OUTPUT,
+            Reg7                                => Register7_OUTPUT,
+            Reg8                                => Register8_OUTPUT,
 
 --------------------------------------------------------------------------------------
 
@@ -1098,5 +1106,29 @@ PORT MAP(
 --=============================================================
 --===================== Register File ==========================
 --=============================================================
+
+RegisterFile:
+ENTITY work.Register_File
+GENERIC MAP(n => 16)
+PORT MAP(
+	Reg_CLK         => CLK,
+	Reg_RST         => RST,
+        
+        EnableWrite1    => Write1_WB_out,
+        EnableWrite2    => Write2_WB_out,
+        Rdst_Idx1       => index1_WB_out,
+        Rdst_Idx2       => index2_WB_out,
+        Data1           => Data1_WB_out,
+        Data2           => Data2_WB_out,
+
+        Reg1_OUT        => Register1_OUTPUT,
+        Reg2_OUT        => Register2_OUTPUT,
+        Reg3_OUT        => Register3_OUTPUT,
+        Reg4_OUT        => Register4_OUTPUT,
+        Reg5_OUT        => Register5_OUTPUT,
+        Reg6_OUT        => Register6_OUTPUT,
+        Reg7_OUT        => Register7_OUTPUT,
+        Reg8_OUT        => Register8_OUTPUT
+);
 
 END ARCHITECTURE;

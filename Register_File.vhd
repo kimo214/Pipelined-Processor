@@ -9,8 +9,8 @@ ENTITY Register_File IS
         Reg_CLK         : IN  STD_LOGIC;
         Reg_RST		: IN  STD_LOGIC;
 
-	EnWrite1	: IN  STD_LOGIC;
-	EnWrite2	: IN  STD_LOGIC;
+	EnableWrite1	: IN  STD_LOGIC;
+	EnableWrite2	: IN  STD_LOGIC;
 	Rdst_Idx1	: IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 	Rdst_Idx2	: IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 	Data1		: IN  STD_LOGIC_VECTOR(n-1 DOWNTO 0);
@@ -40,9 +40,9 @@ BEGIN
 	IF(Falling_Edge(Reg_CLK)) THEN
 		IF(Reg_RST = '1') THEN
 			RegisterFile <= (OTHERS => (OTHERS => '0'));
-		ELSIF((EnWrite1 = '1' and EnWrite2 = '1' and Rdst_Idx1 = Rdst_Idx2) or (EnWrite1 = '0' and EnWrite2 = '1')) THEN
+		ELSIF((EnableWrite1 = '1' and EnableWrite2 = '1' and Rdst_Idx1 = Rdst_Idx2) or (EnableWrite1 = '0' and EnableWrite2 = '1')) THEN
 			RegisterFile(TO_INTEGER(UNSIGNED(Rdst_Idx2))) <= Data2;
-		ELSIF(EnWrite1 = '1') THEN
+		ELSIF(EnableWrite1 = '1') THEN
 			RegisterFile(TO_INTEGER(UNSIGNED(Rdst_Idx1))) <= Data1;
 		END IF;
 	END IF;

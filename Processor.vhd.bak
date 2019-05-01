@@ -20,6 +20,14 @@ SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_IN     : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_OUT    : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 
+SIGNAL Register1_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register2_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register3_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register4_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register5_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register6_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register7_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+SIGNAL Register8_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 --------------------------------------------  FETCH TO BUFFER  ----------------------------------------------
 
 signal IR1_Fetch_out, IR2_Fetch_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -62,7 +70,7 @@ signal	Memory_Read1_FD_out, Memory_Write1_FD_out, ALU_As_Address1_FD_out,
 signal	Memory_Read2_FD_out, Memory_Write2_FD_out, ALU_As_Address2_FD_out,
         SP_As_Address2_FD_out, PC_As_Data2_FD_out 			                : STD_LOGIC;
         			
-signal	Memory_Result_FD_out	        	                                : STD_LOGIC_VECTOR (15 DOWNTO 0);
+signal	Memory_Result_FD_out	        	                                : STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 ---- For Channel 1
 	
@@ -109,7 +117,7 @@ signal	Memory_Read1_Decode_out, Memory_Write1_Decode_out, ALU_As_Address1_Decode
 signal	Memory_Read2_Decode_out, Memory_Write2_Decode_out, ALU_As_Address2_Decode_out,
         SP_As_Address2_Decode_out, PC_As_Data2_Decode_out 	                : STD_LOGIC;
         			
-signal	Memory_Result_Decode_out	        	                            : STD_LOGIC_VECTOR (15 DOWNTO 0);
+signal	Memory_Result_Decode_out	        	                            : STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 ---- For Channel 1
 	
@@ -162,7 +170,7 @@ signal	Memory_Read1_DE_out, Memory_Write1_DE_out, ALU_As_Address1_DE_out,
 signal	Memory_Read2_DE_out, Memory_Write2_DE_out, ALU_As_Address2_DE_out,
         SP_As_Address2_DE_out, PC_As_Data2_DE_out 			                : STD_LOGIC;
         			
-signal	Memory_Result_DE_out	        	                                : STD_LOGIC_VECTOR (15 DOWNTO 0);
+signal	Memory_Result_DE_out	        	                                : STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 ---- For Channel 1
 	
@@ -220,7 +228,7 @@ signal	Memory_Read1_EM_out, Memory_Write1_EM_out, ALU_As_Address1_EM_out,
 signal	Memory_Read2_EM_out, Memory_Write2_EM_out, ALU_As_Address2_EM_out,
         SP_As_Address2_EM_out, PC_As_Data2_EM_out 			                : STD_LOGIC;
         			
-signal	Memory_Result_EM_out	        	                                : STD_LOGIC_VECTOR (15 DOWNTO 0);
+signal	Memory_Result_EM_out	        	                                : STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 ---- For Channel 1
 	
@@ -277,7 +285,7 @@ signal	Memory_Read1_MW_out, Memory_Write1_MW_out, ALU_As_Address1_MW_out,
 signal	Memory_Read2_MW_out, Memory_Write2_MW_out, ALU_As_Address2_MW_out,
         SP_As_Address2_MW_out, PC_As_Data2_MW_out 			                : STD_LOGIC;
         			
-signal	Memory_Result_MW_out	        	                                : STD_LOGIC_VECTOR (15 DOWNTO 0);
+signal	Memory_Result_MW_out	        	                                : STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 ---- For Channel 1
 	
@@ -294,13 +302,13 @@ signal	Enable_SP2_MW_out, Enable_Reg2_MW_out, Mem_or_ALU2_MW_out			: STD_LOGIC;
 ---------------------------------------------------------------------------------------------------------------     
 ----------------------------------------  WriteBack to Register File  -------------------------------------------
 
-signal SP_Execute_out                                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
+signal SP_WB_out                                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
-signal Data1_Execute_out, Data2_Execute_out                                 : std_logic_vector(15 downto 0);
+signal Data1_WB_out, Data2_WB_out                                 : std_logic_vector(15 downto 0);
 
-signal index1_Execute_out, index2_Execute_out                               : std_logic_vector(2 downto 0);
+signal index1_WB_out, index2_WB_out                               : std_logic_vector(2 downto 0);
 
-signal Write1_Execute_out, Write2_Execute_out                               : std_logic;
+signal Write1_WB_out, Write2_WB_out                               : std_logic;
 
 --------------------------------------------------------------------------------------------------------------
 ------------------------------------    E N D    O F    S I G N A L S   --------------------------------------
@@ -519,14 +527,14 @@ PORT MAP(
             PC_IN             	                => PC_FD_out,
             SP_IN             			=> SP_FD_out,
             Flag_Register                       => Flags_FD_out,
-            Reg1                                => IR1_FD_out,
-            Reg2                                => IR1_FD_out,
-            Reg3                                => IR1_FD_out,
-            Reg4                                => IR1_FD_out,
-            Reg5                                => IR1_FD_out,
-            Reg6                                => IR1_FD_out,
-            Reg7                                => IR1_FD_out,
-            Reg8                                => IR1_FD_out,
+            Reg1                                => Register1_OUTPUT,
+            Reg2                                => Register2_OUTPUT,
+            Reg3                                => Register3_OUTPUT,
+            Reg4                                => Register4_OUTPUT,
+            Reg5                                => Register5_OUTPUT,
+            Reg6                                => Register6_OUTPUT,
+            Reg7                                => Register7_OUTPUT,
+            Reg8                                => Register8_OUTPUT,
 
 --------------------------------------------------------------------------------------
 
@@ -1064,5 +1072,63 @@ PORT MAP(
 --=============================================================
 --===================== WriteBack Stage ==========================
 --=============================================================
+
+WriteBack_Stage:
+ENTITY work.WB
+PORT MAP(
+        ALU1      =>  ALU1_Result_MW_out,
+        ALU2      =>  ALU2_Result_MW_out,
+        SP        =>  SP_MW_out,
+        MEM       =>  Memory_Result_MW_out,
+        
+        InPort    =>  (others => '0'),  ---------TO BE DONE***********************
+        inS1      =>  '0',              ---------TO BE DONE***********************
+        inS2      =>  '0',              ---------TO BE DONE***********************
+
+        S1        =>  Mem_or_ALU1_MW_out,
+        S2        =>  Mem_or_ALU2_MW_out,
+        en1SP     =>  Enable_SP1_MW_out,
+        en2SP     =>  Enable_SP2_MW_out,
+        enWrite1  =>  Enable_Reg1_MW_out,
+        enWrite2  =>  Enable_Reg2_MW_out,
+        reg1Index =>  Rdst_Idx1_MW_out,
+        reg2Index =>  Rdst_Idx2_MW_out,
+
+        SPout     =>  SP_WB_out,
+        index1    =>  index1_WB_out,
+        index2    =>  index2_WB_out,
+        Data1     =>  Data1_WB_out,
+        Data2     =>  Data2_WB_out,
+        Write1out =>  Write1_WB_out,
+        Write2out =>  Write2_WB_out
+);
+
+--=============================================================
+--===================== Register File ==========================
+--=============================================================
+
+RegisterFile:
+ENTITY work.RegisterFile
+GENERIC MAP(n => 16)
+PORT MAP(
+	Reg_CLK         => CLK,
+	Reg_RST         => RST,
+        
+        EnableWrite1    => Write1_WB_out,
+        EnableWrite2    => Write2_WB_out,
+        Rdst_Idx1       => index1_WB_out,
+        Rdst_Idx2       => index2_WB_out,
+        Data1           => Data1_WB_out,
+        Data2           => Data2_WB_out,
+
+        Reg1_OUT        => Register1_OUTPUT,
+        Reg2_OUT        => Register2_OUTPUT,
+        Reg3_OUT        => Register3_OUTPUT,
+        Reg4_OUT        => Register4_OUTPUT,
+        Reg5_OUT        => Register5_OUTPUT,
+        Reg6_OUT        => Register6_OUTPUT,
+        Reg7_OUT        => Register7_OUTPUT,
+        Reg8_OUT        => Register8_OUTPUT
+);
 
 END ARCHITECTURE;
