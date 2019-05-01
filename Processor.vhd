@@ -358,6 +358,7 @@ PORT MAP(
 --=============================================================
 --===================== Fetch Stage ===========================
 --=============================================================
+
 Fetch_Stage:
 ENTITY work.Fetch
 GENERIC MAP(n => 16, m => 10)
@@ -488,18 +489,238 @@ PORT MAP(
         Memory_Result_OUT      => Memory_Result_FD_out,
 -------------------------------------------------------------- --        
 
-        Rsrc_Idx1_OUT        =>  Rsrc_Idx1_FD_out,
-        Rdst_Idx1_OUT        =>  Rdst_Idx1_FD_out,
-        Enable_SP1_OUT       =>  Enable_SP1_FD_out,
-        Enable_Reg1_OUT      =>  Enable_Reg1_FD_out,
-        Mem_or_ALU1_OUT      =>  Mem_or_ALU1_FD_out,
+        Rsrc_Idx1_OUT        => Rsrc_Idx1_FD_out,
+        Rdst_Idx1_OUT        => Rdst_Idx1_FD_out,
+        Enable_SP1_OUT       => Enable_SP1_FD_out,
+        Enable_Reg1_OUT      => Enable_Reg1_FD_out,
+        Mem_or_ALU1_OUT      => Mem_or_ALU1_FD_out,
 -----------------------------------------------------------------
 
-        Rsrc_Idx2_OUT        =>  Rsrc_Idx2_FD_out,
-        Rdst_Idx2_OUT        =>  Rdst_Idx2_FD_out,
-        Enable_SP2_OUT       =>  Enable_SP2_FD_out,
-        Enable_Reg2_OUT      =>  Enable_Reg2_FD_out,
-        Mem_or_ALU2_OUT      =>  Mem_or_ALU2_FD_out
+        Rsrc_Idx2_OUT        => Rsrc_Idx2_FD_out,
+        Rdst_Idx2_OUT        => Rdst_Idx2_FD_out,
+        Enable_SP2_OUT       => Enable_SP2_FD_out,
+        Enable_Reg2_OUT      => Enable_Reg2_FD_out,
+        Mem_or_ALU2_OUT      => Mem_or_ALU2_FD_out
+);
+
+--=============================================================
+--===================== Decode Stage ==========================
+--=============================================================
+
+
+Decode_Stage:
+ENTITY work.Decode
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+            EXT_CLK                             => CLK,
+            EXT_RST                             => RST,                                        
+            IR1_IN                              => IR1_FD_out,
+            IR2_IN                              => IR2_FD_out
+            PC_IN             	                => PC_FD_out,
+            SP_IN             			=> SP_FD_out,
+            Flag_Register                       => Flags_FD_out,
+            Reg1                                => Reg
+            Reg2                                =>
+            Reg3                                =>
+            Reg4                                =>
+            Reg5                                =>
+            Reg6                                =>
+            Reg7                                =>
+            Reg8                                =>
+
+--------------------------------------------------------------------------------------
+
+            NOP1_OUT                            => NOP1_Decode_out,
+            Taken1_OUT			        => Taken1_Decode_out,                        
+            ALU1_OP_Code_OUT                    => ALU1_OP_Code_Decode_out,           
+            ALU1_Operand1_OUT                   => ALU1_Operand1_Decode_out,  
+            ALU1_Operand2_OUT                   => ALU1_Operand2_Decode_out,  
+            Two_Operand_Instr1_Flag_OUT         => Two_Operand_Instr1_Flag_Decode_out,                             
+            One_or_Two1_OUT                     => One_or_Two1_Decode_out,                     
+            SETC1                               => SET_Carry1_Decode_out,
+            CLRC1                               => CLR_Carry1_Decode_out,  
+
+--------------------------------------------------------------------------------------
+
+            NOP2_OUT                            => NOP2_Decode_out,
+            Taken2_OUT			        => Taken2_Decode_out,                        
+            ALU2_OP_Code_OUT                    => ALU2_OP_Code_Decode_out,           
+            ALU2_Operand1_OUT                   => ALU2_Operand1_Decode_out,  
+            ALU2_Operand2_OUT                   => ALU2_Operand2_Decode_out,  
+            Two_Operand_Instr2_Flag_OUT         => Two_Operand_Instr2_Flag_Decode_out,                             
+            One_or_Two2_OUT                     => One_or_Two2_Decode_out,                     
+            SETC2                               => SET_Carry2_Decode_out,
+            CLRC2                               => CLR_Carry2_Decode_out,
+--------------------------------------------------------------------------------------
+
+            Memory_Read1_OUT	                => Memory_Read1_Decode_out,  
+            Memory_Write1_OUT			=> Memory_Write1_Decode_out,  
+            ALU_As_Address1_OUT	                => ALU_As_Address1_Decode_out,                                
+            SP_As_Address1_OUT		    	=> SP_As_Address1_Decode_out,                                
+            PC_As_Data1_OUT		        => PC_As_Data1_Decode_out,  			
+    
+--------------------------------------------------------------------------------------
+
+            Memory_Read2_OUT	                => Memory_Read2_Decode_out,  
+            Memory_Write2_OUT			=> Memory_Write2_Decode_out,  
+            ALU_As_Address2_OUT	                => ALU_As_Address2_Decode_out,                                
+            SP_As_Address2_OUT		    	=> SP_As_Address2_Decode_out,                                
+            PC_As_Data2_OUT		        => PC_As_Data2_Decode_out,  			               
+    
+            Memory_Result_OUT	        	=> Memory_Result_Decode_out,  
+    
+--------------------------------------------------------------------------------------
+
+            Rsrc_Idx1_OUT	          	   => Rsrc_Idx1_Decode_out,  
+            Rdst_Idx1_OUT	                   => Rdst_Idx1_Decode_out,  
+            Enable_SP1_OUT			   => Enable_SP1_Decode_out,                                
+            Enable_Reg1_OUT	                   => Enable_Reg1_Decode_out,  			               
+            Mem_or_ALU1_OUT			   => Mem_or_ALU1_Decode_out,                                
+        
+--------------------------------------------------------------------------------------
+
+            Rsrc_Idx2_OUT	          	   => Rsrc_Idx2_Decode_out,  
+            Rdst_Idx2_OUT	                   => Rdst_Idx2_Decode_out,  
+            Enable_SP2_OUT			   => Enable_SP2_Decode_out,                                
+            Enable_Reg2_OUT	                   => Enable_Reg2_Decode_out,  			               
+            Mem_or_ALU2_OUT			   => Mem_or_ALU2_Decode_out,
+    
+);
+
+
+--========================================================================
+--======================  DE Buffer ======================================
+
+ID_Exe_Buffer:
+ENTITY work.BUF
+PORT MAP(
+        EXT_CLK   => CLK,
+        EXT_RST   => RST,
+	
+	Stall     => '0',
+        Flush     => '0',
+-------------------------------------------------------
+        IR1_IN    => IR1_Fetch_out,
+        IR2_IN    => IR2_Fetch_out,
+        PC_IN     => PC_Register_OUT,
+        SP_IN     => SP_Register_OUT,
+        Flags_IN  => Flag_Register_OUT,
+-------------------------------------------------------
+
+        NOP1_IN          => NOP1_Decode_out,
+        Taken1_IN        => Taken1_Decode_out,
+        SET_Carry1_IN    => SET_Carry1_Decode_out,
+        CLR_Carry1_IN    => CLR_Carry1_Decode_out,
+        ALU1_OP_Code_IN  => ALU1_OP_Code_Decode_out,
+        ALU1_Operand1_IN => ALU1_Operand1_Decode_out,
+        ALU1_Operand2_IN => ALU1_Operand2_Decode_out,
+        Two_Operand_Instr1_Flag_IN => Two_Operand_Instr1_Flag_Decode_out,
+        One_or_Two1_IN   => One_or_Two1_Decode_out,
+        ALU1_Result_IN   => ALU1_Result_Decode_out,
+
+----------------------------------------------------------
+
+        NOP2_IN          => NOP2_Decode_out,
+        Taken2_IN        => Taken2_Decode_out,
+        SET_Carry2_IN    => SET_Carry2_Decode_out,
+        CLR_Carry2_IN    => CLR_Carry2_Decode_out,
+        ALU2_OP_Code_IN  => ALU2_OP_Code_Decode_out,
+        ALU2_Operand1_IN => ALU2_Operand1_Decode_out,
+        ALU2_Operand2_IN => ALU2_Operand2_Decode_out,
+        Two_Operand_Instr2_Flag_IN => Two_Operand_Instr2_Flag_Decode_out,
+        One_or_Two2_IN   => One_or_Two2_Decode_out,
+        ALU2_Result_IN   => ALU2_Result_Decode_out,
+
+-----------------------------------------------------------
+
+        Memory_Read1_IN  => Memory_Read1_Decode_out,
+        Memory_Write1_IN => Memory_Write1_Decode_out,
+        ALU_As_Address1_IN => ALU_As_Address1_Decode_out,
+        SP_As_Address1_IN  => SP_As_Address1_Decode_out,
+        PC_As_Data1_IN => PC_As_Data1_Decode_out,
+
+-----------------------------------------------------------
+
+        Memory_Read2_IN  => Memory_Read2_Decode_out,
+        Memory_Write2_IN => Memory_Write2_Decode_out,
+        ALU_As_Address2_IN => ALU_As_Address2_Decode_out,
+        SP_As_Address2_IN  => SP_As_Address2_Decode_out,
+        PC_As_Data2_IN => PC_As_Data2_Decode_out,
+
+-----------------------------------------------------------
+
+        Rsrc_Idx1_IN   => Rsrc_Idx1_Decode_out,
+        Rdst_Idx1_IN   => Rdst_Idx1_Decode_out,
+        Enable_SP1_IN  => Enable_SP1_Decode_out,
+        Enable_Reg1_IN => Enable_Reg1_Decode_out,
+        Mem_or_ALU1_IN => Mem_or_ALU1_Decode_out,
+
+-----------------------------------------------------------
+
+        Rsrc_Idx2_IN   => Rsrc_Idx2_Decode_out,
+        Rdst_Idx2_IN   => Rdst_Idx2_Decode_out,
+        Enable_SP2_IN  => Enable_SP2_Decode_out,
+        Enable_Reg2_IN => Enable_Reg2_Decode_out,
+        Mem_or_ALU2_IN => Mem_or_ALU2_Decode_out,
+
+----------------------------------------------------------------
+        IR1_OUT        => IR1_DE_out,
+        IR2_OUT        => IR2_DE_out,
+        PC_OUT         => PC_DE_out,   --- OLD PC
+        SP_OUT         => SP_DE_out,   --- OLD SP
+        Flags_OUT      => Flags_DE_out,
+
+----------------------------------------------------------------
+        NOP1_OUT                    => NOP1_DE_out,
+        Taken1_OUT                  => Taken1_DE_out,
+        SET_Carry1_OUT              => SET_Carry1_DE_out,
+        CLR_Carry1_OUT              => CLR_Carry1_DE_out,
+        ALU1_OP_Code_OUT            => ALU1_OP_Code_DE_out,
+        ALU1_Operand1_OUT           => ALU1_Operand1_DE_out,
+        ALU1_Operand2_OUT           => ALU1_Operand2_DE_out,
+        Two_Operand_Instr1_Flag_OUT => Two_Operand_Instr1_Flag_DE_out,
+        One_or_Two1_OUT             => One_or_Two1_DE_out,
+        ALU1_Result_OUT             => ALU1_Result_DE_out,
+-----------------------------------------------------------------
+        NOP2_OUT                    => NOP2_DE_out,
+        Taken2_OUT                  => Taken2_DE_out,
+        SET_Carry2_OUT              => SET_Carry2_DE_out,
+        CLR_Carry2_OUT              => CLR_Carry2_DE_out,
+        ALU2_OP_Code_OUT            => ALU2_OP_Code_DE_out,
+        ALU2_Operand1_OUT           => ALU2_Operand1_DE_out,
+        ALU2_Operand2_OUT           => ALU2_Operand2_DE_out,
+        Two_Operand_Instr2_Flag_OUT => Two_Operand_Instr2_Flag_DE_out,
+        One_or_Two2_OUT             => One_or_Two2_DE_out,
+        ALU2_Result_OUT             => ALU2_Result_DE_out,
+------------------------------------------------------------------
+        Memory_Read1_OUT       => Memory_Read1_DE_out,
+        Memory_Write1_OUT      => Memory_Write1_DE_out,
+        ALU_As_Address1_OUT    => ALU_As_Address1_DE_out,
+        SP_As_Address1_OUT     => SP_As_Address1_DE_out,
+        PC_As_Data1_OUT        => PC_As_Data1_DE_out,
+------------------------------------------------------------------
+
+        Memory_Read2_OUT       => Memory_Read2_DE_out,
+        Memory_Write2_OUT      => Memory_Write2_DE_out,
+        ALU_As_Address2_OUT    => ALU_As_Address2_DE_out,
+        SP_As_Address2_OUT     => SP_As_Address2_DE_out,
+        PC_As_Data2_OUT        => PC_As_Data2_DE_out,
+
+        Memory_Result_OUT      => Memory_Result_DE_out,
+-------------------------------------------------------------- --        
+
+        Rsrc_Idx1_OUT        => Rsrc_Idx1_DE_out,
+        Rdst_Idx1_OUT        => Rdst_Idx1_DE_out,
+        Enable_SP1_OUT       => Enable_SP1_DE_out,
+        Enable_Reg1_OUT      => Enable_Reg1_DE_out,
+        Mem_or_ALU1_OUT      => Mem_or_ALU1_DE_out,
+-----------------------------------------------------------------
+
+        Rsrc_Idx2_OUT        => Rsrc_Idx2_DE_out,
+        Rdst_Idx2_OUT        => Rdst_Idx2_DE_out,
+        Enable_SP2_OUT       => Enable_SP2_DE_out,
+        Enable_Reg2_OUT      => Enable_Reg2_DE_out,
+        Mem_or_ALU2_OUT      => Mem_or_ALU2_DE_out
 );
 
 

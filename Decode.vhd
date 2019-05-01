@@ -7,7 +7,7 @@ ENTITY Decode IS
     PORT(
 
 -------------------------------------  Input Bits  ----------------------------------------
-            CLK,RST                             : IN  STD_LOGIC;                                                                          
+            EXT_CLK,EXT_RST                             : IN  STD_LOGIC;                                                                          
             IR1_IN         		                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             IR2_IN         			            : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             PC_IN             			        : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
