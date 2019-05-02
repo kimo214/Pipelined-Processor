@@ -1,1 +1,4 @@
-add r1,r2
+inc r1
+inc r2
+inc r3
+inc r4
