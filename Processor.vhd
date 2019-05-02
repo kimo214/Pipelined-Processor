@@ -13,8 +13,8 @@ END ENTITY;
 ARCHITECTURE flow OF Processor IS
 
 --------------------------------------------      SIGNALS      ----------------------------------------------
-SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
-SIGNAL PC_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0);
+SIGNAL PC_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0);
 SIGNAL SP_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_IN     : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');

@@ -13,7 +13,7 @@ END ENTITY;
 ARCHITECTURE flow OF Processor IS
 
 --------------------------------------------      SIGNALS      ----------------------------------------------
-SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0);
 SIGNAL PC_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL SP_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
@@ -928,8 +928,8 @@ PORT MAP(
 
         ALU1_OUT          => ALU1_Result_EM_out,
 ---------------------------------------------------------------
-        Rsrc2             => ALU2_Operand1_EM_out,
-        Rdst2             => ALU2_Operand2_EM_out,
+        Rsrc2             => ALU2_Operand1_EM_out(15 DOWNTO 0),
+        Rdst2             => ALU2_Operand2_EM_out(15 DOWNTO 0),
 
         Read_Enable2      => Memory_Read2_EM_out,
         Write_Enable2     => Memory_Write2_EM_out,
