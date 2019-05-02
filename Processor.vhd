@@ -738,7 +738,7 @@ ENTITY work.Execution
 GENERIC MAP(n => 16)
 PORT MAP(
         Flag_Reg            => Flag_Register_OUT,
-        
+        dummy_CLK	    => CLK,
         ALU_As_Address1     => ALU_As_Address1_DE_out,
         SP_As_Address1      => SP_As_Address1_DE_out,
         SET_Carry1          => SET_Carry1_DE_out,

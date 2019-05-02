@@ -102,13 +102,13 @@ BEGIN
 			IF(mem_PC_data = '1') THEN           	 -- Call instruction
 				mem_data <= PC;               	 	 -- *****NOTE PC or PC+1  not sure yet
 			ELSIF(SP_As_Address1 = '1') THEN     	 -- Push instruction in Ch1  *** May change it to Rsrc not Rdst
-				mem_data <= Rdst1;	
+				mem_data <= ZERO_VECTOR(15 downto 0) & Rdst1;	
 			ELSIF(SP_As_Address2 = '1') THEN     	 -- Push Instruction in Ch2  *** Same as above
-				mem_data <= Rdst2; 
+				mem_data <= ZERO_VECTOR(15 downto 0) & Rdst2; 
 			ELSIF(Write_Enable1 = '1') THEN      	 -- Store instruction in Ch1
-				mem_data <= Rsrc1;
+				mem_data <= ZERO_VECTOR(15 downto 0) & Rsrc1;
 			ELSIF(Write_Enable2 = '1') THEN      	 -- Store instruction in Ch2
-				mem_data <= Rsrc2;
+				mem_data <= ZERO_VECTOR(15 downto 0) & Rsrc2;
 			END IF;
 		END IF;
 
