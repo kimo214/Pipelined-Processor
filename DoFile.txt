@@ -1,0 +1,26 @@
+vsim -gui work.processor
+add wave -position insertpoint  \
+sim:/processor/CLK \
+sim:/processor/RST \
+sim:/processor/Interrupt
+add wave -position insertpoint  \
+sim:/processor/Register1_OUTPUT \
+sim:/processor/Register2_OUTPUT \
+sim:/processor/Register3_OUTPUT \
+sim:/processor/Register4_OUTPUT \
+sim:/processor/Register5_OUTPUT \
+sim:/processor/Register6_OUTPUT \
+sim:/processor/Register7_OUTPUT \
+sim:/processor/Register8_OUTPUT \
+sim:/processor/Enable_Reg1_Decode_out \
+sim:/processor/Enable_Reg2_Decode_out \
+sim:/processor/IR1_FD_out \
+sim:/processor/IR2_FD_out \
+mem load -filltype value -filldata 1000010000000001 -fillradix binary /processor/Fetch_Stage/Instruction_Memory/instruction_memory(0)
+mem load -filltype value -filldata 1000010000000010 -fillradix binary /processor/Fetch_Stage/Instruction_Memory/instruction_memory(1)
+mem load -filltype value -filldata 1000010000000011 -fillradix binary /processor/Fetch_Stage/Instruction_Memory/instruction_memory(2)
+mem load -filltype value -filldata 1000010000000100 -fillradix binary /processor/Fetch_Stage/Instruction_Memory/instruction_memory(3)
+force -freeze sim:/processor/CLK 0 0, 1 {50 ps} -r 100
+force -freeze sim:/processor/RST 1 0
+run
+force -freeze sim:/processor/RST 0 0
