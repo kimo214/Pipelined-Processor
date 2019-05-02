@@ -52,6 +52,7 @@ for L in lines:
     Value = ""
     L = L.replace(',',' ')
     L = L.replace(';',' ')
+    L = L.replace('\n','')
     Words = L.split(' ')
     Instruction = Words[0].upper()
     
@@ -91,6 +92,7 @@ for L in lines:
 
     #Write in the output file.
     Out.write(IR)
+    print(IR)
     Out.write('\n')
     if(Value != ""):
         Out.write(Value)

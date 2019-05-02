@@ -175,7 +175,6 @@ BEGIN
 
 END PROCESS;
 
-Flags_OUT <= new_Flags;
 ALU1_OUT <= ALU1_Result;
 ALU2_OUT <= ALU2_Result;
 

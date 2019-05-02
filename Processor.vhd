@@ -4,7 +4,7 @@ USE IEEE.numeric_std.all;
 USE IEEE.math_real.all;
 
 ENTITY Processor is
-    port( CLK, RST, Interrupt: IN  STD_LOGIC;
+    port( CLK, PC_RST, Buffer_RST, Interrupt: IN  STD_LOGIC;
           pport : INOUT STD_LOGIC_Vector(15 Downto 0)
     );
 END ENTITY;
@@ -20,6 +20,7 @@ SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_IN     : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_OUT    : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 
+SIGNAL Register0_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register1_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register2_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register3_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
@@ -27,11 +28,9 @@ SIGNAL Register4_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register5_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register6_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register7_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
-SIGNAL Register8_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 --------------------------------------------  FETCH TO BUFFER  ----------------------------------------------
 
 signal IR1_Fetch_out, IR2_Fetch_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
-signal PC_Fetch_out                 : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 --------------------------------------------------------------------------------------------------------------
 --------------------------------------------    IF\ID Buffer    ----------------------------------------------
@@ -189,7 +188,7 @@ signal	Enable_SP2_DE_out, Enable_Reg2_DE_out, Mem_or_ALU2_DE_out			: STD_LOGIC;
 
 signal ALU1_Execute_out, ALU2_Execute_out                                   : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
-signal Flags_Execute_out		                                            : STD_LOGIC_VECTOR( 2 DOWNTO 0);
+signal Flags_Execute_out		                                            : STD_LOGIC_VECTOR(2 DOWNTO 0) := (others =>'0');
 
 --------------------------------------------------------------------------------------------------------------     
 --------------------------------------------  Ex\Mem Buffer  ----------------------------------------------
@@ -326,14 +325,13 @@ PORT MAP(
 	c_cin => '0',
 	ff    => PC_Register_IN
 );	
-
 --================ Global Registers ========================
 Program_Counter_Register:
 ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => RST,
+	Reg_RST  => PC_RST,
 	EN       => '1',           
 	Din      => PC_Register_IN,
 
@@ -345,7 +343,7 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => RST,
+	Reg_RST  => '0',
 	EN       => '1',          
 	Din      => SP_Register_IN,
 
@@ -357,9 +355,9 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 3)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => RST,
+	Reg_RST  => PC_RST,
 	EN       => '1',          
-	Din      => Flag_Register_IN,
+	Din      => Flags_Execute_out,
 
 	Dout     => Flag_Register_OUT
 );
@@ -372,7 +370,6 @@ ENTITY work.Fetch
 GENERIC MAP(n => 16, m => 10)
 PORT MAP(
         EXT_CLK           => CLK,
-        EXT_RST           => RST,
         EXT_INTR          => Interrupt,
 
         PC_IN             => PC_Register_OUT,
@@ -385,7 +382,7 @@ IF_ID_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => RST,
+        EXT_RST   => Buffer_RST,
 	
 	Stall     => '0',
         Flush     => '0',
@@ -401,7 +398,7 @@ PORT MAP(
         Taken1_IN        => '0',
         SET_Carry1_IN    => '0',
         CLR_Carry1_IN    => '0',
-        ALU1_OP_Code_IN  => (others => '0'),
+        ALU1_OP_Code_IN  => "111",
         ALU1_Operand1_IN => (others => '0'),
         ALU1_Operand2_IN => (others => '0'),
         Two_Operand_Instr1_Flag_IN => '0',
@@ -414,7 +411,7 @@ PORT MAP(
         Taken2_IN        => '0',
         SET_Carry2_IN    => '0',
         CLR_Carry2_IN    => '0',
-        ALU2_OP_Code_IN  => (others => '0'),
+        ALU2_OP_Code_IN  => "111",
         ALU2_Operand1_IN => (others => '0'),
         ALU2_Operand2_IN => (others => '0'),
         Two_Operand_Instr2_Flag_IN => '0',
@@ -521,12 +518,12 @@ ENTITY work.Decode
 GENERIC MAP(n => 16, m => 10)
 PORT MAP(
             EXT_CLK                             => CLK,
-            EXT_RST                             => RST,                                        
             IR1_IN                              => IR1_FD_out,
             IR2_IN                              => IR2_FD_out,
             PC_IN             	                => PC_FD_out,
             SP_IN             			=> SP_FD_out,
             Flag_Register                       => Flags_FD_out,
+            Reg0                                => Register0_OUTPUT,
             Reg1                                => Register1_OUTPUT,
             Reg2                                => Register2_OUTPUT,
             Reg3                                => Register3_OUTPUT,
@@ -534,7 +531,6 @@ PORT MAP(
             Reg5                                => Register5_OUTPUT,
             Reg6                                => Register6_OUTPUT,
             Reg7                                => Register7_OUTPUT,
-            Reg8                                => Register8_OUTPUT,
 
 --------------------------------------------------------------------------------------
 
@@ -604,7 +600,7 @@ ID_Exe_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => RST,
+        EXT_RST   => Buffer_RST,
 	
 	Stall     => '0',
         Flush     => '0',
@@ -783,7 +779,7 @@ Exe_Mem_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => RST,
+        EXT_RST   => Buffer_RST,
 	
 	Stall     => '0',
         Flush     => '0',
@@ -908,10 +904,9 @@ PORT MAP(
 
 Memory_Stage:
 ENTITY work.Memory
-GENERIC MAP(n => 16, m => 10)
+GENERIC MAP(n => 16, m => 20)
 PORT MAP(
         EXT_CLK           => CLK,
-        EXT_RST           => RST,
         EXT_INTR          => Interrupt,
 
         PC                => PC_EM_out,
@@ -950,7 +945,7 @@ Mem_WB_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => RST,
+        EXT_RST   => Buffer_RST,
 	
 	Stall     => '0',
         Flush     => '0',
@@ -1112,7 +1107,7 @@ ENTITY work.Register_File
 GENERIC MAP(n => 16)
 PORT MAP(
 	Reg_CLK         => CLK,
-	Reg_RST         => RST,
+	Reg_RST         => '0',
         
         EnableWrite1    => Write1_WB_out,
         EnableWrite2    => Write2_WB_out,
@@ -1121,14 +1116,14 @@ PORT MAP(
         Data1           => Data1_WB_out,
         Data2           => Data2_WB_out,
 
+        Reg0_OUT        => Register0_OUTPUT,
         Reg1_OUT        => Register1_OUTPUT,
         Reg2_OUT        => Register2_OUTPUT,
         Reg3_OUT        => Register3_OUTPUT,
         Reg4_OUT        => Register4_OUTPUT,
         Reg5_OUT        => Register5_OUTPUT,
         Reg6_OUT        => Register6_OUTPUT,
-        Reg7_OUT        => Register7_OUTPUT,
-        Reg8_OUT        => Register8_OUTPUT
+        Reg7_OUT        => Register7_OUTPUT
 );
 
 END ARCHITECTURE;
