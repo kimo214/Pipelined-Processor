@@ -13,7 +13,6 @@ ENTITY Decode IS
             PC_IN             			        : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
             SP_IN             			        : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
             Flag_Register                       : IN  STD_LOGIC_VECTOR( 2 DOWNTO 0);
-            Reg0                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             Reg1                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             Reg2                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             Reg3                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -21,6 +20,7 @@ ENTITY Decode IS
             Reg5                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             Reg6                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             Reg7                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+            Reg8                                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             
 -------------------------------------  Output Bits  ---------------------------------------
     
@@ -90,14 +90,14 @@ signal registerfile : reg_file;
 
 BEGIN
 
-    registerfile(0)<=reg0;
-    registerfile(1)<=reg1; 
-    registerfile(2)<=reg2;
-    registerfile(3)<=reg3;
-    registerfile(4)<=reg4;
-    registerfile(5)<=reg5;
-    registerfile(6)<=reg6;
-    registerfile(7)<=reg7;
+    registerfile(0)<=reg1;
+    registerfile(1)<=reg2; 
+    registerfile(2)<=reg3;
+    registerfile(3)<=reg4;
+    registerfile(4)<=reg5;
+    registerfile(5)<=reg6;
+    registerfile(6)<=reg7;
+    registerfile(7)<=reg8;
  
     PROCESS(EXT_CLK)
     

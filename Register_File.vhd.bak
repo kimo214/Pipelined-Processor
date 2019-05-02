@@ -29,8 +29,8 @@ END ENTITY;
 
 ARCHITECTURE arch_register_file OF Register_File IS
 
-    TYPE RegFIle IS ARRAY(0 TO 7) OF STD_LOGIC_VECTOR(n-1 DOWNTO 0);
-    SIGNAL RegisterFile : RegFIle :=  (OTHERS => (OTHERS => '0'));
+    TYPE RegFile IS ARRAY(0 TO 7) OF STD_LOGIC_VECTOR(n-1 DOWNTO 0);
+    SIGNAL RegisterFile : RegFile :=  (OTHERS => (OTHERS => '0'));
 
 BEGIN
 

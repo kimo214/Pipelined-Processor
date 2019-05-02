@@ -16,14 +16,14 @@ ENTITY Register_File IS
 	Data1		: IN  STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 	Data2		: IN  STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 
+	Reg0_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 	Reg1_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 	Reg2_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 	Reg3_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 	Reg4_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 	Reg5_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 	Reg6_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
-	Reg7_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
-	Reg8_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0)
+	Reg7_OUT	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0)
     );
 END ENTITY;
 
@@ -53,13 +53,13 @@ BEGIN
 
 END PROCESS;
 
-Reg1_OUT <= RegisterFile(0);
-Reg2_OUT <= RegisterFile(1);
-Reg3_OUT <= RegisterFile(2);
-Reg4_OUT <= RegisterFile(3);
-Reg5_OUT <= RegisterFile(4);
-Reg6_OUT <= RegisterFile(5);
-Reg7_OUT <= RegisterFile(6);
-Reg8_OUT <= RegisterFile(7);
+Reg0_OUT <= RegisterFile(0);
+Reg1_OUT <= RegisterFile(1);
+Reg2_OUT <= RegisterFile(2);
+Reg3_OUT <= RegisterFile(3);
+Reg4_OUT <= RegisterFile(4);
+Reg5_OUT <= RegisterFile(5);
+Reg6_OUT <= RegisterFile(6);
+Reg7_OUT <= RegisterFile(7);
     
 END ARCHITECTURE;

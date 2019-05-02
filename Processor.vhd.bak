@@ -4,7 +4,7 @@ USE IEEE.numeric_std.all;
 USE IEEE.math_real.all;
 
 ENTITY Processor is
-    port( CLK, RST, Interrupt: IN  STD_LOGIC;
+    port( CLK, PC_RST, Buffer_RST, Interrupt: IN  STD_LOGIC;
           pport : INOUT STD_LOGIC_Vector(15 Downto 0)
     );
 END ENTITY;
@@ -13,7 +13,7 @@ END ENTITY;
 ARCHITECTURE flow OF Processor IS
 
 --------------------------------------------      SIGNALS      ----------------------------------------------
-SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0);
+SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL PC_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL SP_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
@@ -31,7 +31,6 @@ SIGNAL Register8_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 --------------------------------------------  FETCH TO BUFFER  ----------------------------------------------
 
 signal IR1_Fetch_out, IR2_Fetch_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
-signal PC_Fetch_out                 : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 --------------------------------------------------------------------------------------------------------------
 --------------------------------------------    IF\ID Buffer    ----------------------------------------------
@@ -326,14 +325,13 @@ PORT MAP(
 	c_cin => '0',
 	ff    => PC_Register_IN
 );	
-
 --================ Global Registers ========================
 Program_Counter_Register:
 ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => RST,
+	Reg_RST  => PC_RST,
 	EN       => '1',           
 	Din      => PC_Register_IN,
 
@@ -345,7 +343,7 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => RST,
+	Reg_RST  => '0',
 	EN       => '1',          
 	Din      => SP_Register_IN,
 
@@ -357,9 +355,9 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 3)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => RST,
+	Reg_RST  => '0',
 	EN       => '1',          
-	Din      => Flag_Register_IN,
+	Din      => Flags_Execute_out,
 
 	Dout     => Flag_Register_OUT
 );
@@ -385,7 +383,7 @@ IF_ID_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => RST,
+        EXT_RST   => BUF_RST,
 	
 	Stall     => '0',
         Flush     => '0',
@@ -604,7 +602,7 @@ ID_Exe_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => RST,
+        EXT_RST   => BUF_RST,
 	
 	Stall     => '0',
         Flush     => '0',
@@ -783,7 +781,7 @@ Exe_Mem_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => RST,
+        EXT_RST   => BUF_RST,
 	
 	Stall     => '0',
         Flush     => '0',
@@ -908,7 +906,7 @@ PORT MAP(
 
 Memory_Stage:
 ENTITY work.Memory
-GENERIC MAP(n => 16, m => 10)
+GENERIC MAP(n => 16, m => 20)
 PORT MAP(
         EXT_CLK           => CLK,
         EXT_RST           => RST,
@@ -950,7 +948,7 @@ Mem_WB_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => RST,
+        EXT_RST   => BUF_RST,
 	
 	Stall     => '0',
         Flush     => '0',
