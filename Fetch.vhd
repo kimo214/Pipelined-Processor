@@ -37,13 +37,7 @@ PORT MAP(
 );
 
 
-PROCESS(EXT_CLK)
-BEGIN
-	-- Handle other cases where IR not from RAM (INTR)
-	IF(RISING_EDGE(EXT_CLK)) THEN
-		IR1 <= mem_data1;
-		IR2 <= mem_data2;
-	END IF;
-END PROCESS;
+IR1 <= mem_data1;
+IR2 <= mem_data2;
 
 END ARCHITECTURE;

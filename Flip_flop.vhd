@@ -16,7 +16,7 @@ BEGIN
 
     PROCESS(CLK, RST)
     BEGIN
-	IF FALLING_EDGE(CLK) THEN
+	IF Rising_EDGE(CLK) THEN
       	    IF RST = '1' THEN
                 Dout <= '0';
             ELSIF EN = '1' THEN
