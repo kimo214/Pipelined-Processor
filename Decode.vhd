@@ -99,254 +99,155 @@ BEGIN
     registerfile(6)<=reg6;
     registerfile(7)<=reg7;
  
-    PROCESS(EXT_CLK)
-    
-    BEGIN
-    IF RISING_EDGE(EXT_CLK) THEN
-
-
     ---------------------------------------------------------------------------------------------------------------
     ------------------------------------    C H A N N E L   1    --------------------------------------------------
     ---------------------------------------------------------------------------------------------------------------
 
-    if (IR1_IN(15 DOWNTO 11) = "00000" or (IR1_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
-                                       or (IR1_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') 
-                                       or (IR1_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')) then
-    NOP1_OUT <='1';
-    else NOP1_OUT<='0';    
-    end if;
+    NOP1_OUT <= '1' when IR1_IN(15 DOWNTO 11) = "00000" or (IR1_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
+        or (IR1_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') or (IR1_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')
+        else '0';
 
-    if ((IR1_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
-        or (IR1_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') 
-        or (IR1_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')) then
-    Taken1_OUT <='1';
-    else Taken1_OUT<='0';    
-    end if;
+    Taken1_OUT <= '1' when (IR1_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
+        or (IR1_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') or (IR1_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')
+        else '0';
+
+    ALU1_OP_Code_OUT <= "100" when IR1_IN(15 DOWNTO 10)="100001" or IR1_IN(15 DOWNTO 10)="110000" 
+        or IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="100110" or IR1_IN(15 DOWNTO 10)="100111"
+        else "110" when IR1_IN(15 DOWNTO 10)="100010" or IR1_IN(15 DOWNTO 10)="110010"
+                    or IR1_IN(15 DOWNTO 10)="100101" or IR1_IN(15 DOWNTO 10)="100011"
+        else IR1_IN(13 DOWNTO 11) when IR1_IN(15)='1' 
+        else "111";
+
+    ALU1_Operand1_OUT <= PC_IN when IR1_IN(15 DOWNTO 10)="001010"
+        else SP_IN when IR1_IN(15 DOWNTO 12)="1001" or IR1_IN(15 DOWNTO 10)="100011"
+        else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(2 DOWNTO 0)))); 
+
+    ALU1_Operand2_OUT <= "0000000000000000000000000" & IR1_IN(9 DOWNTO 3) when IR1_IN(15 DOWNTO 10)="111101" or IR1_IN(15 DOWNTO 10)="111001"
+        else PC_IN when IR1_IN(15 DOWNTO 13)="010" or IR1_IN(15 DOWNTO 10)="100101"
+        else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(2 DOWNTO 0)))) when IR1_IN(15 DOWNTO 10)="100011" or IR1_IN(15 DOWNTO 10)="100100"
+        else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(5 DOWNTO 3))));
+
+    Two_Operand_Instr1_Flag_OUT <= '1' when IR1_IN(15 DOWNTO 14)="11"
+        else '0';
+
+    One_or_Two1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="100101" or IR1_IN(15 DOWNTO 10)="100110" or IR1_IN(15 DOWNTO 10)="100111"
+        else '0';
+
+    SETC1 <= '1' when IR1_IN(15 DOWNTO 10)="000110" 
+        else '0'; 
+
+    CLRC1 <= '1' when IR1_IN(15 DOWNTO 10)="000100"
+        else '0';
+
+    Memory_Read1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="001011"
+        else '0';
+
+    Memory_Write1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="001100" or IR1_IN(15 DOWNTO 10)="100011"
+        else '0'; 
+
+    -- pop ret rti
+    ALU_As_Address1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="100110" or IR1_IN(15 DOWNTO 10)="100111"
+        else '0';
+
+    SP_As_Address1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="100011" or IR1_IN(15 DOWNTO 10)="100101"
+        else '0';
+
+    PC_As_Data1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="100101"
+        else '0';
+
+    Rsrc_Idx1_OUT <= IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 14)="11" or IR1_IN(15 DOWNTO 14)="00";
+
+    Rdst_Idx1_OUT <= IR1_IN(5 DOWNTO 3) when IR1_IN(15 DOWNTO 13)="110" or IR1_IN(15 DOWNTO 13)="000" or IR1_IN(15 DOWNTO 13)="001"
+        else IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 13)="100" or IR1_IN(15 DOWNTO 13)="010"; 
+
+    Enable_SP1_OUT <= '1' when IR1_IN(15 DOWNTO 12)="1001" or IR1_IN(15 DOWNTO 10)="100011"
+        else '0'; 
+
+    Mem_or_ALU1_OUT <= '1' when IR1_IN(15 DOWNTO 11)="00101" or IR1_IN(15 DOWNTO 10)="100100"
+        else '0';
+
+    Enable_Reg1_OUT <= '0' when IR1_IN(15 DOWNTO 10)="000000" or IR1_IN(15 DOWNTO 10)="000110" 
+        or IR1_IN(15 DOWNTO 10)="000100" or IR1_IN(15 DOWNTO 10)="001001"
+        or IR1_IN(15 DOWNTO 10)="100011" or IR1_IN(15 DOWNTO 10)="001100" 
+        or IR1_IN(15 DOWNTO 10)="100101" or IR1_IN(15 DOWNTO 11)="10011"
+        or IR1_IN(15 DOWNTO 13)="010"
+       else '1';
     
-    if (IR1_IN(15 DOWNTO 10)="100001" or IR1_IN(15 DOWNTO 10)="110000" 
-        or IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="100110" 
-        or IR1_IN(15 DOWNTO 10)="100111") then
-    ALU1_OP_Code_OUT <= "100";
-    elsif (IR1_IN(15 DOWNTO 10)="100010" or IR1_IN(15 DOWNTO 10)="110010"
-        or IR1_IN(15 DOWNTO 10)="100101" or IR1_IN(15 DOWNTO 10)="100011") then 
-    ALU1_OP_Code_OUT <= "110";
-    elsif(IR1_IN(15)='1') then 
-    ALU1_OP_Code_OUT <= IR1_IN(13 DOWNTO 11);
-    else ALU1_OP_Code_OUT <= "111";
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="001010") then 
-    ALU1_Operand1_OUT<=PC_IN;
-    elsif(IR1_IN(15 DOWNTO 12)="1001" or IR1_IN(15 DOWNTO 10)="100011") then 
-    ALU1_Operand1_OUT<=SP_IN;
-    else ALU1_Operand1_OUT<="0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(2 DOWNTO 0))));
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="111101" or IR1_IN(15 DOWNTO 10)="111001") then
-    ALU1_Operand2_OUT<= "0000000000000000000000000" & IR1_IN(9 DOWNTO 3);
-    elsif(IR1_IN(15 DOWNTO 13)="010" or IR1_IN(15 DOWNTO 10)="100101") then 
-    ALU1_Operand2_OUT<=PC_IN;
-    elsif(IR1_IN(15 DOWNTO 10)="100011" or IR1_IN(15 DOWNTO 10)="100100") then
-    ALU1_Operand2_OUT<="0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(2 DOWNTO 0))));
-    else ALU1_Operand2_OUT<="0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(5 DOWNTO 3))));
-    end if;
-
-    if(IR1_IN(15 DOWNTO 14)="11") then 
-    Two_Operand_Instr1_Flag_OUT<='1';
-    else Two_Operand_Instr1_Flag_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="100101" or IR1_IN(15 DOWNTO 10)="100110" or IR1_IN(15 DOWNTO 10)="100111") then 
-    One_or_Two1_OUT <= '1';
-    else One_or_Two1_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="000110") then 
-    SETC1<='1';
-    else SETC1<='0';
-    end if; 
-
-    if(IR1_IN(15 DOWNTO 10)="000100") then 
-    CLRC1<='1';
-    else CLRC1<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="001011") then 
-    Memory_Read1_OUT<='1';
-    else Memory_Read1_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="001100" or IR1_IN(15 DOWNTO 10)="100011") then 
-    Memory_Write1_OUT<='1';
-    else Memory_Write1_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="100110" or IR1_IN(15 DOWNTO 10)="100111") then -- pop ret rti
-    ALU_As_Address1_OUT<='1';
-    else ALU_As_Address1_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="100011" or IR1_IN(15 DOWNTO 10)="100101") then 
-    SP_As_Address1_OUT<='1';
-    else SP_As_Address1_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="100101") then 
-    PC_As_Data1_OUT<='1';
-    else PC_As_Data1_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 14)="11" or IR1_IN(15 DOWNTO 14)="00") then 
-    Rsrc_Idx1_OUT<=IR1_IN(2 DOWNTO 0);
-    end if;
-
-    if(IR1_IN(15 DOWNTO 13)="110" or IR1_IN(15 DOWNTO 13)="000" or IR1_IN(15 DOWNTO 13)="001") then 
-    Rdst_Idx1_OUT<=IR1_IN(5 DOWNTO 3);
-    elsif(IR1_IN(15 DOWNTO 13)="100" or IR1_IN(15 DOWNTO 13)="010") then 
-    Rdst_Idx1_OUT<=IR1_IN(2 DOWNTO 0);
-    end if;
-
-    if(IR1_IN(15 DOWNTO 12)="1001" or IR1_IN(15 DOWNTO 10)="100011") then 
-    Enable_SP1_OUT<='1';
-    else Enable_SP1_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 11)="00101" or IR1_IN(15 DOWNTO 10)="100100") then 
-    Mem_or_ALU1_OUT<='1';
-    else Mem_or_ALU1_OUT<='0';
-    end if;
-
-    if(IR1_IN(15 DOWNTO 10)="000000" or IR1_IN(15 DOWNTO 10)="000110" or IR1_IN(15 DOWNTO 10)="000100" or IR1_IN(15 DOWNTO 10)="001001"
-       or IR1_IN(15 DOWNTO 10)="100011" or IR1_IN(15 DOWNTO 10)="001100" or IR1_IN(15 DOWNTO 10)="100101" or IR1_IN(15 DOWNTO 11)="10011"
-       or IR1_IN(15 DOWNTO 13)="010") then 
-    Enable_Reg1_OUT<='0';
-    else Enable_Reg1_OUT<='1';
-    end if;
-    
-
 
     ---------------------------------------------------------------------------------------------------------------
     ------------------------------------    C H A N N E L   2    --------------------------------------------------
     ---------------------------------------------------------------------------------------------------------------
 
+    NOP2_OUT <= '1' when IR2_IN(15 DOWNTO 11) = "00000" or (IR2_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
+        or (IR2_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') or (IR2_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')
+        else '0';
 
-    if(IR2_IN(15 DOWNTO 11) = "00000" or (IR2_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
-                                       or (IR2_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') 
-                                       or (IR2_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')) then
-    NOP2_OUT <='1';
-    else NOP2_OUT<='0';    
-    end if;
+    Taken2_OUT <= '1' when (IR2_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
+        or (IR2_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') or (IR2_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')
+        else '0';
 
-    if((IR2_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
-        or (IR2_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') 
-        or (IR2_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')) then
-    Taken2_OUT <='1';
-    else Taken2_OUT<='0';    
-    end if;
-    
-    if(IR2_IN(15 DOWNTO 10)="100001" or IR2_IN(15 DOWNTO 10)="110000" 
-        or IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="100110" 
-        or IR2_IN(15 DOWNTO 10)="100111") then
-    ALU2_OP_Code_OUT <= "100";
-    elsif (IR2_IN(15 DOWNTO 10)="100010" or IR2_IN(15 DOWNTO 10)="110010"
-        or IR2_IN(15 DOWNTO 10)="100101" or IR2_IN(15 DOWNTO 10)="100011") then 
-    ALU2_OP_Code_OUT <= "110";
-    elsif(IR2_IN(15)='1') then 
-    ALU2_OP_Code_OUT <= IR2_IN(13 DOWNTO 11);
-    else ALU2_OP_Code_OUT <= "111";
-    end if;
+    ALU2_OP_Code_OUT <= "100" when IR2_IN(15 DOWNTO 10)="100001" or IR2_IN(15 DOWNTO 10)="110000" 
+        or IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="100110" or IR2_IN(15 DOWNTO 10)="100111"
+        else "110" when IR2_IN(15 DOWNTO 10)="100010" or IR2_IN(15 DOWNTO 10)="110010"
+                    or IR2_IN(15 DOWNTO 10)="100101" or IR2_IN(15 DOWNTO 10)="100011"
+        else IR2_IN(13 DOWNTO 11) when IR2_IN(15)='1' 
+        else "111";
 
-    if(IR2_IN(15 DOWNTO 10)="001010") then 
-    ALU2_Operand1_OUT<=PC_IN;
-    elsif(IR2_IN(15 DOWNTO 12)="1001" or IR2_IN(15 DOWNTO 10)="100011") then 
-    ALU2_Operand1_OUT<=SP_IN;
-    else ALU2_Operand1_OUT<="0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(2 DOWNTO 0))));
-    end if;
+    ALU2_Operand1_OUT <= PC_IN when IR2_IN(15 DOWNTO 10)="001010"
+        else SP_IN when IR2_IN(15 DOWNTO 12)="1001" or IR2_IN(15 DOWNTO 10)="100011"
+        else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(2 DOWNTO 0)))); 
 
-    if(IR2_IN(15 DOWNTO 10)="111101" or IR2_IN(15 DOWNTO 10)="111001") then
-    ALU2_Operand2_OUT<= "0000000000000000000000000" & IR2_IN(9 DOWNTO 3);
-    elsif(IR2_IN(15 DOWNTO 13)="010" or IR2_IN(15 DOWNTO 10)="100101") then 
-    ALU2_Operand2_OUT<=PC_IN;
-    elsif(IR2_IN(15 DOWNTO 10)="100011" or IR2_IN(15 DOWNTO 10)="100100") then
-    ALU2_Operand2_OUT<="0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(2 DOWNTO 0))));
-    else ALU2_Operand2_OUT<="0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(5 DOWNTO 3))));
-    end if;
-    
-    if(IR2_IN(15 DOWNTO 14)="11") then 
-    Two_Operand_Instr2_Flag_OUT<='1';
-    else Two_Operand_Instr2_Flag_OUT<='0';
-    end if;
+    ALU2_Operand2_OUT <= "0000000000000000000000000" & IR2_IN(9 DOWNTO 3) when IR2_IN(15 DOWNTO 10)="111101" or IR2_IN(15 DOWNTO 10)="111001"
+        else PC_IN when IR2_IN(15 DOWNTO 13)="010" or IR2_IN(15 DOWNTO 10)="100101"
+        else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(2 DOWNTO 0)))) when IR2_IN(15 DOWNTO 10)="100011" or IR2_IN(15 DOWNTO 10)="100100"
+        else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(5 DOWNTO 3))));
 
-    if(IR2_IN(15 DOWNTO 10)="100101" or IR2_IN(15 DOWNTO 10)="100110" or IR2_IN(15 DOWNTO 10)="100111") then 
-    One_or_Two2_OUT <= '1';
-    else One_or_Two2_OUT<='0';
-    end if;
+    Two_Operand_Instr2_Flag_OUT <= '1' when IR2_IN(15 DOWNTO 14)="11"
+        else '0';
 
-    if(IR2_IN(15 DOWNTO 10)="000110") then 
-    SETC2<='1';
-    else SETC2<='0';
-    end if; 
+    One_or_Two2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="100101" or IR2_IN(15 DOWNTO 10)="100110" or IR2_IN(15 DOWNTO 10)="100111"
+        else '0';
 
-    if(IR2_IN(15 DOWNTO 10)="000100") then 
-    CLRC2<='1';
-    else CLRC2<='0';
-    end if;
+    SETC2 <= '1' when IR2_IN(15 DOWNTO 10)="000110" 
+        else '0'; 
 
-    if(IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="001011") then 
-    Memory_Read2_OUT<='1';
-    else Memory_Read2_OUT<='0';
-    end if;
+    CLRC2 <= '1' when IR2_IN(15 DOWNTO 10)="000100"
+        else '0';
 
-    if(IR2_IN(15 DOWNTO 10)="001100" or IR2_IN(15 DOWNTO 10)="100011") then 
-    Memory_Write2_OUT<='1';
-    else Memory_Write2_OUT<='0';
-    end if;
+    Memory_Read2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="001011"
+        else '0';
 
-    if(IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="100110" or IR2_IN(15 DOWNTO 10)="100111") then -- pop ret rti
-    ALU_As_Address2_OUT<='1';
-    else ALU_As_Address2_OUT<='0';
-    end if;
+    Memory_Write2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="001100" or IR2_IN(15 DOWNTO 10)="100011"
+        else '0'; 
 
-    if(IR2_IN(15 DOWNTO 10)="100011" or IR2_IN(15 DOWNTO 10)="100101") then 
-    SP_As_Address2_OUT<='1';
-    else SP_As_Address2_OUT<='0';
-    end if;
+    -- pop ret rti
+    ALU_As_Address2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="100110" or IR2_IN(15 DOWNTO 10)="100111"
+        else '0';
 
-    if(IR2_IN(15 DOWNTO 10)="100101") then 
-    PC_As_Data2_OUT<='1';
-    else PC_As_Data2_OUT<='0';
-    end if;
+    SP_As_Address2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="100011" or IR2_IN(15 DOWNTO 10)="100101"
+        else '0';
 
-    if(IR2_IN(15 DOWNTO 14)="11" or IR2_IN(15 DOWNTO 14)="00") then 
-    Rsrc_Idx2_OUT<=IR2_IN(2 DOWNTO 0);
-    end if;
+    PC_As_Data2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="100101"
+        else '0';
 
-    if(IR2_IN(15 DOWNTO 13)="110" or IR2_IN(15 DOWNTO 13)="000" or IR2_IN(15 DOWNTO 13)="001") then 
-    Rdst_Idx2_OUT<=IR2_IN(5 DOWNTO 3);
-    elsif(IR2_IN(15 DOWNTO 13)="100" or IR2_IN(15 DOWNTO 13)="010") then 
-    Rdst_Idx2_OUT<=IR2_IN(2 DOWNTO 0);
-    end if;
+    Rsrc_Idx2_OUT <= IR2_IN(2 DOWNTO 0) when IR2_IN(15 DOWNTO 14)="11" or IR2_IN(15 DOWNTO 14)="00";
 
-    if(IR2_IN(15 DOWNTO 12)="1001" or IR2_IN(15 DOWNTO 10)="100011") then 
-    Enable_SP2_OUT<='1';
-    else Enable_SP2_OUT<='0';
-    end if;
+    Rdst_Idx2_OUT <= IR2_IN(5 DOWNTO 3) when IR2_IN(15 DOWNTO 13)="110" or IR2_IN(15 DOWNTO 13)="000" or IR2_IN(15 DOWNTO 13)="001"
+        else IR2_IN(2 DOWNTO 0) when IR2_IN(15 DOWNTO 13)="100" or IR2_IN(15 DOWNTO 13)="010"; 
 
-    if(IR2_IN(15 DOWNTO 11)="00101" or IR2_IN(15 DOWNTO 10)="100100") then 
-    Mem_or_ALU2_OUT<='1';
-    else Mem_or_ALU2_OUT<='0';
-    end if;
+    Enable_SP2_OUT <= '1' when IR2_IN(15 DOWNTO 12)="1001" or IR2_IN(15 DOWNTO 10)="100011"
+        else '0'; 
 
-    if(IR2_IN(15 DOWNTO 10)="000000" or IR2_IN(15 DOWNTO 10)="000110" or IR2_IN(15 DOWNTO 10)="000100" or IR2_IN(15 DOWNTO 10)="001001"
-       or IR2_IN(15 DOWNTO 10)="100011" or IR2_IN(15 DOWNTO 10)="001100" or IR2_IN(15 DOWNTO 10)="100101" or IR2_IN(15 DOWNTO 11)="10011"
-       or IR2_IN(15 DOWNTO 13)="010") then 
-    Enable_Reg2_OUT<='0';
-    else Enable_Reg2_OUT<='1';
-    end if;
+    Mem_or_ALU2_OUT <= '1' when IR2_IN(15 DOWNTO 11)="00101" or IR2_IN(15 DOWNTO 10)="100100"
+        else '0';
 
+    Enable_Reg2_OUT <= '0' when IR2_IN(15 DOWNTO 10)="000000" or IR2_IN(15 DOWNTO 10)="000110" 
+        or IR2_IN(15 DOWNTO 10)="000100" or IR2_IN(15 DOWNTO 10)="001001"
+        or IR2_IN(15 DOWNTO 10)="100011" or IR2_IN(15 DOWNTO 10)="001100" 
+        or IR2_IN(15 DOWNTO 10)="100101" or IR2_IN(15 DOWNTO 11)="10011"
+        or IR2_IN(15 DOWNTO 13)="010"
+       else '1';
 
-    END IF;
-    END PROCESS;
 
     
 END ARCHITECTURE;
