@@ -4,5 +4,22 @@ nop
 nop
 nop
 nop
+nop
+nop
+push r1
+nop
+nop
+nop
+nop
+nop
+nop
+nop
 inc r1
 nop
+nop
+nop
+nop
+nop
+nop
+nop
+pop r1

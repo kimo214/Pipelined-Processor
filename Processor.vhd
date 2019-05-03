@@ -802,7 +802,7 @@ PORT MAP(
         CLR_Carry1_IN      => CLR_Carry1_DE_out,
         ALU1_OP_Code_IN    => ALU1_OP_Code_DE_out,
         ALU1_Operand1_IN   => ALU1_Operand1_DE_out,
-        ALU1_Operand2_IN   => ALU1_Operand1_DE_out,
+        ALU1_Operand2_IN   => ALU1_Operand2_DE_out,
         Two_Operand_Instr1_Flag_IN => Two_Operand_Instr1_Flag_DE_out,
         One_or_Two1_IN     => One_or_Two1_DE_out,
         
@@ -814,7 +814,7 @@ PORT MAP(
         CLR_Carry2_IN      => CLR_Carry2_DE_out,
         ALU2_OP_Code_IN    => ALU2_OP_Code_DE_out,
         ALU2_Operand1_IN   => ALU2_Operand1_DE_out,
-        ALU2_Operand2_IN   => ALU2_Operand1_DE_out,
+        ALU2_Operand2_IN   => ALU2_Operand2_DE_out,
         Two_Operand_Instr2_Flag_IN => Two_Operand_Instr2_Flag_DE_out,
         One_or_Two2_IN     => One_or_Two2_DE_out,
         
