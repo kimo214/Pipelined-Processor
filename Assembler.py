@@ -39,10 +39,14 @@ def GetRegIdx(IDX):
     return IDX
 
 file = open('input.txt','r')
-Out = open('Output.txt','w')
+#Out = open('Output.txt','w')
+Out = open('Output.mem','w')
+Out.write('// memory data file (do not edit the following line - required for mem load use)\n')
+Out.write('// instance=/Project/my_ram/ram\n')
+Out.write('// format=mti addressradix=d dataradix=b version=1.0 wordsperline=1\n')
 
 lines = file.readlines()
-
+i = 0
 for L in lines:
 
     Instruction = ""
@@ -91,6 +95,8 @@ for L in lines:
         IR = IR.ljust(16,'0') 
 
     #Write in the output file.
+    Out.write(str(i)+': ')
+    i += 1
     Out.write(IR)
     print(IR)
     Out.write('\n')
