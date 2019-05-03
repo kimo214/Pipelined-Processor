@@ -82,12 +82,12 @@ PROCESS(EXT_CLK, Read_Enable, Write_Enable)
 BEGIN
 	IF(Read_Enable = '1' or Write_Enable = '1') THEN
 		-- Determine Which address to use
-		IF(SP_Address = '1') THEN  					-- PUSH Instruction
-			mem_address <= SP;
+		IF(SP_Address = '1') THEN  				-- PUSH Instruction
+			mem_address <= SP(m-1 DOWNTO 0);
 		ELSIF(ALU_As_Address1 = '1') THEN			-- pop instruction Ch1 --> take ALU 1 out
-			mem_address <= ALU1_OUT;
+			mem_address <= ALU1_OUT(m-1 DOWNTO 0);
 		ELSIF(ALU_As_Address2 = '1') THEN			-- pop instruction Ch2 --> take ALU 2 out
-			mem_address <= ALU2_OUT;
+			mem_address <= ALU2_OUT(m-1 DOWNTO 0);
 		ELSIF(Read_Enable1 = '1') THEN				-- Load Instruction
 			mem_address <= ZERO_VECTOR(3 DOWNTO 0) & Rsrc1;
 		ELSIF(Read_Enable2 ='1') THEN

@@ -1,1 +1,8 @@
-not r1
+inc r1
+nop
+nop
+nop
+nop
+nop
+inc r1
+nop

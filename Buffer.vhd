@@ -152,19 +152,19 @@ ARCHITECTURE arch_BUF OF BUF IS
 BEGIN
 
 IR1_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 16) PORT MAP( EXT_CLK, EXT_RST, '1', IR1_IN, IR1_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 16) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), IR1_IN, IR1_OUT );
 
 IR2_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 16) PORT MAP( EXT_CLK, EXT_RST, '1', IR2_IN, IR2_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 16) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), IR2_IN, IR2_OUT );
 
 PC_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', PC_IN, PC_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), PC_IN, PC_OUT );
 
 SP_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', SP_IN, SP_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), SP_IN, SP_OUT );
 
 FLAG_REG:
-ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', Flags_IN, Flags_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), Flags_IN, Flags_OUT );
 
 ---------------------------------------------------------------------------------------------------------------------------
 
@@ -181,13 +181,13 @@ CLR_Carry1_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', CLR_Carry1_IN, CLR_Carry1_OUT );
 
 ALU1_OP_CODE_REG:
-ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', ALU1_OP_Code_IN, ALU1_OP_Code_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), ALU1_OP_Code_IN, ALU1_OP_Code_OUT );
 
 ALU1_OPERAND1_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', ALU1_Operand1_IN, ALU1_Operand1_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), ALU1_Operand1_IN, ALU1_Operand1_OUT );
 
 ALU1_OPERAND2_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', ALU1_Operand2_IN, ALU1_Operand2_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), ALU1_Operand2_IN, ALU1_Operand2_OUT );
 
 TWO_OPERAND_INSTR1_FLAG_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Two_Operand_Instr1_Flag_IN, Two_Operand_Instr1_Flag_OUT );
@@ -196,7 +196,7 @@ ONE_OR_TWO1_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', One_or_Two1_IN, One_or_Two1_OUT );
 
 ALU1_Result_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', ALU1_Result_IN, ALU1_Result_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), ALU1_Result_IN, ALU1_Result_OUT );
 
 -------------------------------------------------------
 
@@ -213,22 +213,22 @@ CLR_Carry2_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', CLR_Carry2_IN, CLR_Carry2_OUT );
 
 ALU2_OP_CODE_REG:
-ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', ALU2_OP_Code_IN, ALU2_OP_Code_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), ALU2_OP_Code_IN, ALU2_OP_Code_OUT );
 
 ALU2_OPERAND1_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', ALU2_Operand1_IN, ALU2_Operand1_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), ALU2_Operand1_IN, ALU2_Operand1_OUT );
 
 ALU2_OPERAND2_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', ALU2_Operand2_IN, ALU2_Operand2_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), ALU2_Operand2_IN, ALU2_Operand2_OUT );
 
 TWO_OPERAND_INSTR2_FLAG_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Two_Operand_Instr2_Flag_IN, Two_Operand_Instr2_Flag_OUT );
 
-ONE_OR_TWO2_REG:
+ONE_OR_TWO2_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', One_or_Two2_IN, One_or_Two2_OUT );
 
 ALU2_Result_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', ALU2_Result_IN, ALU2_Result_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), ALU2_Result_IN, ALU2_Result_OUT );
 
 -------------------------------------------------------------------------------------------------------------------------
 
@@ -266,15 +266,15 @@ ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', PC_As_Data2_IN, PC_As_Dat
 
 
 MEM_RES_REG:
-ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', Memory_Result_IN, Memory_Result_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n => 32) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), Memory_Result_IN, Memory_Result_OUT );
 
 ---------------------------------------------------------------------------------------------------------------------------
 
 Rsrc_Idx1_REG:
-ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', Rsrc_Idx1_IN, Rsrc_Idx1_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), Rsrc_Idx1_IN, Rsrc_Idx1_OUT );
 
 Rdst_Idx1_REG:
-ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', Rdst_Idx1_IN, Rdst_Idx1_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), Rdst_Idx1_IN, Rdst_Idx1_OUT );
 
 Enable_SP1_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Enable_SP1_IN, Enable_SP1_OUT );
@@ -288,10 +288,10 @@ ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Mem_or_ALU1_IN, Mem_or_AL
 ----------------------------------------------------------
 
 Rsrc_Idx2_REG:
-ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', Rsrc_Idx2_IN, Rsrc_Idx2_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), Rsrc_Idx2_IN, Rsrc_Idx2_OUT );
 
 Rdst_Idx2_REG:
-ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', Rdst_Idx2_IN, Rdst_Idx2_OUT );
+ENTITY work.Register_Falling GENERIC MAP(n =>  3) PORT MAP( EXT_CLK, EXT_RST, '1', (others => '0'), Rdst_Idx2_IN, Rdst_Idx2_OUT );
 
 Enable_SP2_FF:
 ENTITY work.Flip_Flop PORT MAP( EXT_CLK, EXT_RST, '1', Enable_SP2_IN, Enable_SP2_OUT );

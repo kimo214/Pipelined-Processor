@@ -4,7 +4,7 @@ USE IEEE.numeric_std.all;
 USE IEEE.math_real.all;
 
 ENTITY Processor is
-    port( CLK, PC_RST, Buffer_RST, Interrupt: IN  STD_LOGIC;
+    port( CLK, Register_RST, Buffer_RST, Interrupt: IN  STD_LOGIC;
           pport : INOUT STD_LOGIC_Vector(15 Downto 0)
     );
 END ENTITY;
@@ -16,7 +16,7 @@ ARCHITECTURE flow OF Processor IS
 SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL PC_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL SP_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
-SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0);
 SIGNAL Flag_Register_IN     : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_OUT    : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 
@@ -309,11 +309,14 @@ signal index1_WB_out, index2_WB_out                               : std_logic_ve
 
 signal Write1_WB_out, Write2_WB_out                               : std_logic;
 
+SIGNAL Enable_SP                                                  : STD_LOGIC := '0';
 --------------------------------------------------------------------------------------------------------------
 ------------------------------------    E N D    O F    S I G N A L S   --------------------------------------
 --------------------------------------------------------------------------------------------------------------
 
 BEGIN
+
+Enable_SP <= Enable_SP1_MW_out or Enable_SP2_MW_out;
 
 --==========================================================
 PC_Adder:-- For incrementing PC .. PC + 2 
@@ -331,7 +334,8 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => PC_RST,
+	Reg_RST  => Register_RST,
+	RST_val  => (others => '0'),
 	EN       => '1',           
 	Din      => PC_Register_IN,
 
@@ -343,9 +347,10 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => '0',
-	EN       => '1',          
-	Din      => SP_Register_IN,
+	Reg_RST  => Register_RST,
+	RST_val  => "00000000000011111111111111111111",  -- 2**20 -1
+	EN       => Enable_SP,
+	Din      => SP_WB_out,
 
 	Dout     => SP_Register_OUT
 );
@@ -355,7 +360,8 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 3)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => PC_RST,
+	Reg_RST  => Register_RST,
+	RST_val  => (others => '0'),
 	EN       => '1',          
 	Din      => Flags_Execute_out,
 

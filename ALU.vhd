@@ -68,7 +68,7 @@ ALU_OUTPUT  <=  Adder_Subtractor_OUT WHEN (Operation = "100" or Operation = "110
 		ELSE NOT(Operand1) WHEN Operation = "000" and En = '1'
 		ELSE Operand1(n - Op2_Int - 1 DOWNTO 0) & ZERO_VECTOR(Op2_Int - 1 DOWNTO 0) WHEN Operation = "101" and Op2_Int > 0 and En = '1'
 		ELSE ZERO_VECTOR(Op2_Int - 1 DOWNTO 0) & Operand1(n-1 DOWNTO Op2_Int) WHEN Operation = "001" and Op2_Int > 0 and En = '1'
-		ELSE Operand1 WHEN En = '1';
+		ELSE Operand1;
 
 Carry_OUT   <=  Carry WHEN Operation = "100" or Operation = "110"
 		ELSE '1'  WHEN (Operation = "101" and Left_Part_SHL > 0) or (Operation = "001" and Right_Part_SHR > 0)

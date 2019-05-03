@@ -16,7 +16,7 @@ ARCHITECTURE flow OF Processor IS
 SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL PC_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL SP_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
-SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0);
 SIGNAL Flag_Register_IN     : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 SIGNAL Flag_Register_OUT    : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
 
@@ -309,11 +309,22 @@ signal index1_WB_out, index2_WB_out                               : std_logic_ve
 
 signal Write1_WB_out, Write2_WB_out                               : std_logic;
 
+SIGNAL Enable_SP                                                  : STD_LOGIC := '0';
 --------------------------------------------------------------------------------------------------------------
 ------------------------------------    E N D    O F    S I G N A L S   --------------------------------------
 --------------------------------------------------------------------------------------------------------------
 
 BEGIN
+
+Enable_SP <= Enable_SP1_MW_out or Enable_SP2_MW_out;
+
+SP_RST_LOGIC:
+PROCESS(PC_RST)
+BEGIN
+        IF(PC_RST = '1') THEN
+                SP_Register_OUT <= "00000000000011111111111111111111";
+        END IF;
+END PROCESS;
 
 --==========================================================
 PC_Adder:-- For incrementing PC .. PC + 2 
@@ -332,6 +343,7 @@ GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
 	Reg_RST  => PC_RST,
+	RST_val  => (others => '0'),
 	EN       => '1',           
 	Din      => PC_Register_IN,
 
@@ -343,9 +355,10 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => '0',
-	EN       => '1',          
-	Din      => SP_Register_IN,
+	Reg_RST  => PC_RST,
+	RST_val  => "00000000000011111111111111111111",
+	EN       => Enable_SP,          
+	Din      => SP_WB_out,
 
 	Dout     => SP_Register_OUT
 );
@@ -356,6 +369,7 @@ GENERIC MAP(n => 3)
 PORT MAP(
 	Reg_CLK  => CLK,
 	Reg_RST  => PC_RST,
+	RST_val  => (others => '0'),
 	EN       => '1',          
 	Din      => Flags_Execute_out,
 
@@ -738,7 +752,7 @@ ENTITY work.Execution
 GENERIC MAP(n => 16)
 PORT MAP(
         Flag_Reg            => Flag_Register_OUT,
-        TST_CLK		    => CLK,
+        dummy_CLK	    => CLK,
         ALU_As_Address1     => ALU_As_Address1_DE_out,
         SP_As_Address1      => SP_As_Address1_DE_out,
         SET_Carry1          => SET_Carry1_DE_out,
