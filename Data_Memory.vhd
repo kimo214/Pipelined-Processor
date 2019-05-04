@@ -38,7 +38,11 @@ BEGIN
 		ReadData <= (others => '0');
 	ELSIF(RD = '1') THEN
 		ReadData(15 DOWNTO  0) <= data_memory(TO_INTEGER(UNSIGNED(Address)));
-		ReadData(31 DOWNTO 16) <= data_memory(TO_INTEGER(UNSIGNED(Address))+1);
+		IF(TO_INTEGER(UNSIGNED(Address)) = (2**m)-1) THEN
+			ReadData(31 DOWNTO 16) <= (others => '0');
+		ELSE
+			ReadData(31 DOWNTO 16) <= data_memory(TO_INTEGER(UNSIGNED(Address))+1);
+		END IF;
 	ELSE
 		ReadData <= (others => '0');
 	END IF;

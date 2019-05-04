@@ -4,7 +4,7 @@ USE IEEE.numeric_std.all;
 USE IEEE.math_real.all;
 
 ENTITY Processor is
-    port( CLK, PC_RST, Buffer_RST, Interrupt: IN  STD_LOGIC;
+    port( CLK, Register_RST, Buffer_RST, Interrupt: IN  STD_LOGIC;
           pport : INOUT STD_LOGIC_Vector(15 Downto 0)
     );
 END ENTITY;
@@ -318,14 +318,6 @@ BEGIN
 
 Enable_SP <= Enable_SP1_MW_out or Enable_SP2_MW_out;
 
-SP_RST_LOGIC:
-PROCESS(PC_RST)
-BEGIN
-        IF(PC_RST = '1') THEN
-                SP_Register_OUT <= "00000000000011111111111111111111";
-        END IF;
-END PROCESS;
-
 --==========================================================
 PC_Adder:-- For incrementing PC .. PC + 2 
 ENTITY work.my_nadder
@@ -342,7 +334,7 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => PC_RST,
+	Reg_RST  => Register_RST,
 	RST_val  => (others => '0'),
 	EN       => '1',           
 	Din      => PC_Register_IN,
@@ -355,9 +347,9 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => PC_RST,
-	RST_val  => "00000000000011111111111111111111",
-	EN       => Enable_SP,          
+	Reg_RST  => Register_RST,
+	RST_val  => "00000000000011111111111111111111",  -- 2**20 -1
+	EN       => Enable_SP,
 	Din      => SP_WB_out,
 
 	Dout     => SP_Register_OUT
@@ -368,7 +360,7 @@ ENTITY work.Register_Falling
 GENERIC MAP(n => 3)
 PORT MAP(
 	Reg_CLK  => CLK,
-	Reg_RST  => PC_RST,
+	Reg_RST  => Register_RST,
 	RST_val  => (others => '0'),
 	EN       => '1',          
 	Din      => Flags_Execute_out,
@@ -810,7 +802,7 @@ PORT MAP(
         CLR_Carry1_IN      => CLR_Carry1_DE_out,
         ALU1_OP_Code_IN    => ALU1_OP_Code_DE_out,
         ALU1_Operand1_IN   => ALU1_Operand1_DE_out,
-        ALU1_Operand2_IN   => ALU1_Operand1_DE_out,
+        ALU1_Operand2_IN   => ALU1_Operand2_DE_out,
         Two_Operand_Instr1_Flag_IN => Two_Operand_Instr1_Flag_DE_out,
         One_or_Two1_IN     => One_or_Two1_DE_out,
         
@@ -822,7 +814,7 @@ PORT MAP(
         CLR_Carry2_IN      => CLR_Carry2_DE_out,
         ALU2_OP_Code_IN    => ALU2_OP_Code_DE_out,
         ALU2_Operand1_IN   => ALU2_Operand1_DE_out,
-        ALU2_Operand2_IN   => ALU2_Operand1_DE_out,
+        ALU2_Operand2_IN   => ALU2_Operand2_DE_out,
         Two_Operand_Instr2_Flag_IN => Two_Operand_Instr2_Flag_DE_out,
         One_or_Two2_IN     => One_or_Two2_DE_out,
         
@@ -976,7 +968,7 @@ PORT MAP(
         CLR_Carry1_IN      => CLR_Carry1_EM_out,
         ALU1_OP_Code_IN    => ALU1_OP_Code_EM_out,
         ALU1_Operand1_IN   => ALU1_Operand1_EM_out,
-        ALU1_Operand2_IN   => ALU1_Operand1_EM_out,
+        ALU1_Operand2_IN   => ALU1_Operand2_EM_out,
         Two_Operand_Instr1_Flag_IN => Two_Operand_Instr1_Flag_EM_out,
         One_or_Two1_IN     => One_or_Two1_EM_out,
         
@@ -988,7 +980,7 @@ PORT MAP(
         CLR_Carry2_IN      => CLR_Carry2_EM_out,
         ALU2_OP_Code_IN    => ALU2_OP_Code_EM_out,
         ALU2_Operand1_IN   => ALU2_Operand1_EM_out,
-        ALU2_Operand2_IN   => ALU2_Operand1_EM_out,
+        ALU2_Operand2_IN   => ALU2_Operand2_EM_out,
         Two_Operand_Instr2_Flag_IN => Two_Operand_Instr2_Flag_EM_out,
         One_or_Two2_IN     => One_or_Two2_EM_out,
         
