@@ -100,33 +100,14 @@ PORT MAP(
 	ALU_OUTPUT => ALU2_Result
 );
 
-ALU1_Operand2_LOGIC:
-PROCESS(ALU1_Enable, ALU1_Operation_Code, Operand1_ALU1, Operand2_ALU1, Two_Operand_Flag1, One_Or_Two_Flag1)
-BEGIN
+	ALU1_Operand2 <= Operand2_ALU1 when Two_Operand_Flag1 = '1' 
+		else ZERO_VECTOR(31 DOWNTO 2) & "10" when One_Or_Two_Flag1 = '1'
+		else ZERO_VECTOR(31 DOWNTO 1) & '1' when One_Or_Two_Flag1 = '0';
 
-	IF(Two_Operand_Flag1 = '1') THEN
-		ALU1_Operand2 <= Operand2_ALU1;
-	ELSIF(One_Or_Two_Flag1 = '1') THEN
-		ALU1_Operand2 <= ZERO_VECTOR(31 DOWNTO 2) & "10";
-	ELSIF(One_Or_Two_Flag1 = '0') THEN
-		ALU1_Operand2 <= ZERO_VECTOR(31 DOWNTO 1) & '1';
-	END IF;
+	ALU2_Operand2 <= Operand2_ALU2 when Two_Operand_Flag2 = '1'
+		else ZERO_VECTOR(31 DOWNTO 2) & "10" when One_Or_Two_Flag2 = '1'
+		else ZERO_VECTOR(31 DOWNTO 1) & '1' when One_Or_Two_Flag2 = '0';
 
-END PROCESS;
-
-ALU2_Operand2_LOGIC:
-PROCESS(ALU2_Enable, ALU2_Operation_Code, Operand1_ALU2, Operand2_ALU2, Two_Operand_Flag2, One_Or_Two_Flag2)
-BEGIN
-
-	IF(Two_Operand_Flag2 = '1') THEN
-		ALU2_Operand2 <= Operand2_ALU2;
-	ELSIF(One_Or_Two_Flag2 = '1') THEN
-		ALU2_Operand2 <= ZERO_VECTOR(31 DOWNTO 2) & "10";
-	ELSIF(One_Or_Two_Flag2 = '0') THEN
-		ALU2_Operand2 <= ZERO_VECTOR(31 DOWNTO 1) & '1';
-	END IF;
-
-END PROCESS;
 
 FLAGS_LOGIC:
 PROCESS(dummy_CLK, ALU1_Enable, ALU2_Enable, ALU1_Cout, ALU2_Cout, ALU1_Result, ALU2_Result, SET_Carry1, SET_Carry2, CLR_Carry1, CLR_Carry2)
