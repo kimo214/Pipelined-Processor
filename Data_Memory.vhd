@@ -28,7 +28,7 @@ BEGIN
 	
 PROCESS(CLK, RD, WR)
 BEGIN
-	IF(Rising_EDGE(CLK) and WR ='1') THEN          		  				-- Write in Falling Edge
+	IF(FALLING_EDGE(CLK) and WR ='1') THEN          		  				-- Write in Falling Edge
 		IF(PC_Data = '1') THEN									-- Little Endian 
 			data_memory(TO_INTEGER(UNSIGNED(Address)))   <= WriteData(31 DOWNTO 16);        -- Higher Byte of PC 
 			data_memory(TO_INTEGER(UNSIGNED(Address))-1) <= WriteData(15 DOWNTO  0);	-- Lower Byte of PC

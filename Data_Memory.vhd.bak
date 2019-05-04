@@ -42,6 +42,7 @@ BEGIN
 			ReadData(31 DOWNTO 16) <= (others => '0');
 		ELSE
 			ReadData(31 DOWNTO 16) <= data_memory(TO_INTEGER(UNSIGNED(Address))+1);
+		END IF;
 	ELSE
 		ReadData <= (others => '0');
 	END IF;
