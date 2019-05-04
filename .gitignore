@@ -1,2 +1,7 @@
 #Ignore all txt files
 *.txt
+input.txt
+Output.mem
+Output.txt
+
+*.bak
