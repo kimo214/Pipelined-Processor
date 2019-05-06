@@ -115,8 +115,8 @@ BEGIN
         or IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="100110" or IR1_IN(15 DOWNTO 10)="100111"
         else "110" when IR1_IN(15 DOWNTO 10)="100010" or IR1_IN(15 DOWNTO 10)="110010"
                     or IR1_IN(15 DOWNTO 10)="100101" or IR1_IN(15 DOWNTO 10)="100011"
-        else "001" when IR1_IN(15 DOWNTO 10)="111001"           --- HUSSEIN
-        else "101" when IR1_IN(15 DOWNTO 10)="111101"           --- HUSSEIN
+        else "001" when IR1_IN(15 DOWNTO 10)="111001"           ---SHR
+        else "101" when IR1_IN(15 DOWNTO 10)="111101"           ---SHL
         else IR1_IN(13 DOWNTO 11) when IR1_IN(15)='1' 
         else "111";
 
@@ -160,7 +160,7 @@ BEGIN
     Rsrc_Idx1_OUT <= IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 14)="11" or IR1_IN(15 DOWNTO 14)="00";
 
     Rdst_Idx1_OUT <= IR1_IN(5 DOWNTO 3) when IR1_IN(15 DOWNTO 13)="110" or IR1_IN(15 DOWNTO 13)="000" or IR1_IN(15 DOWNTO 13)="001"
-        else IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 10)="111001" or when IR1_IN(15 DOWNTO 10)="111101" --shift
+        else IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 10)="111001" or IR1_IN(15 DOWNTO 10)="111101" --shift
         else IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 13)="100" or IR1_IN(15 DOWNTO 13)="010"; 
         
     Enable_SP1_OUT <= '1' when IR1_IN(15 DOWNTO 12)="1001" or IR1_IN(15 DOWNTO 10)="100011"
@@ -187,12 +187,15 @@ BEGIN
 
     Taken2_OUT <= '1' when (IR2_IN(15 DOWNTO 11)="01000" and Flag_Register(0)='1')
         or (IR2_IN(15 DOWNTO 11)="01001" and Flag_Register(1)='1') or (IR2_IN(15 DOWNTO 11)="01010" and Flag_Register(2)='1')
+        or (IR2_IN(15 DOWNTO 11)="01011"   -- JMP Instruction
         else '0';
 
     ALU2_OP_Code_OUT <= "100" when IR2_IN(15 DOWNTO 10)="100001" or IR2_IN(15 DOWNTO 10)="110000" 
         or IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="100110" or IR2_IN(15 DOWNTO 10)="100111"
         else "110" when IR2_IN(15 DOWNTO 10)="100010" or IR2_IN(15 DOWNTO 10)="110010"
                     or IR2_IN(15 DOWNTO 10)="100101" or IR2_IN(15 DOWNTO 10)="100011"
+        else "001" when IR2_IN(15 DOWNTO 10)="111001"           ---SHR
+        else "101" when IR2_IN(15 DOWNTO 10)="111101"           ---SHL
         else IR2_IN(13 DOWNTO 11) when IR2_IN(15)='1' 
         else "111";
 
@@ -236,6 +239,7 @@ BEGIN
     Rsrc_Idx2_OUT <= IR2_IN(2 DOWNTO 0) when IR2_IN(15 DOWNTO 14)="11" or IR2_IN(15 DOWNTO 14)="00";
 
     Rdst_Idx2_OUT <= IR2_IN(5 DOWNTO 3) when IR2_IN(15 DOWNTO 13)="110" or IR2_IN(15 DOWNTO 13)="000" or IR2_IN(15 DOWNTO 13)="001"
+        else IR2_IN(2 DOWNTO 0) when IR2_IN(15 DOWNTO 10)="111001" or IR2_IN(15 DOWNTO 10)="111101" --shift
         else IR2_IN(2 DOWNTO 0) when IR2_IN(15 DOWNTO 13)="100" or IR2_IN(15 DOWNTO 13)="010"; 
 
     Enable_SP2_OUT <= '1' when IR2_IN(15 DOWNTO 12)="1001" or IR2_IN(15 DOWNTO 10)="100011"

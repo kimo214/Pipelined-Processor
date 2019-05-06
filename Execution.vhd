@@ -7,6 +7,10 @@ ENTITY Execution IS
     GENERIC ( n : INTEGER := 16);
     PORT (
 	
+    IR1_IN         		                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+    IR2_IN         			            : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
+
+-----------------------------------------------------------------------------------	
 	Flag_Reg		:	IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 	dummy_CLK		:	IN  STD_LOGIC;
 	ALU_As_Address1		:	IN  STD_LOGIC;
@@ -22,6 +26,8 @@ ENTITY Execution IS
 	Two_Operand_Flag1	:	IN  STD_LOGIC;
 	One_Or_Two_Flag1	:	IN  STD_LOGIC;				-- 0 --> 1  or 1 --> 2
 	
+
+	Taken1_OUT			:   OUT STD_LOGIC;	
 	ALU1_OUT		:	OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 ------------------------------------------------------------------------------------
@@ -37,7 +43,9 @@ ENTITY Execution IS
 	Two_Operand_Flag2	:	IN  STD_LOGIC;
 	One_Or_Two_Flag2	:	IN  STD_LOGIC;				-- 0 --> 1  or 1 --> 2
 
+	Taken2_OUT			:   OUT  STD_LOGIC;
 	ALU2_OUT		:	OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+
 	Flags_OUT		:	OUT STD_LOGIC_VECTOR( 2 DOWNTO 0)
     );
 END ENTITY;
@@ -155,6 +163,14 @@ BEGIN
 	END IF;
 
 END PROCESS;
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+Taken1_OUT <= '1' when (IR1_IN(15 DOWNTO 11)="01011")   -- JMP Instruction
+		else '0';
+Taken2_OUT <= '1' when (IR2_IN(15 DOWNTO 11)="01011")   -- JMP Instruction
+		else '0';
+
 
 ALU1_OUT <= ALU1_Result;
 ALU2_OUT <= ALU2_Result;

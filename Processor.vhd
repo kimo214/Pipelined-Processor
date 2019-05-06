@@ -15,6 +15,8 @@ ARCHITECTURE flow OF Processor IS
 --------------------------------------------      SIGNALS      ----------------------------------------------
 SIGNAL PC_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL PC_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+SIGNAL PC_Adder_OUT         : STD_LOGIC_VECTOR(31 DOWNTO 0);
+
 SIGNAL SP_Register_IN       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL SP_Register_OUT      : STD_LOGIC_VECTOR(31 DOWNTO 0);
 SIGNAL Flag_Register_IN     : STD_LOGIC_VECTOR( 2 DOWNTO 0) := (others => '0');
@@ -187,7 +189,7 @@ signal	Enable_SP2_DE_out, Enable_Reg2_DE_out, Mem_or_ALU2_DE_out			: STD_LOGIC;
 --------------------------------------------  Execute to Buffer  ----------------------------------------------
 
 signal ALU1_Execute_out, ALU2_Execute_out                                   : STD_LOGIC_VECTOR(31 DOWNTO 0);
-
+signal Taken1_Execute_out, Taken2_Execute_out                               : STD_LOGIC;
 signal Flags_Execute_out		                                            : STD_LOGIC_VECTOR(2 DOWNTO 0) := (others =>'0');
 
 --------------------------------------------------------------------------------------------------------------     
@@ -317,7 +319,9 @@ SIGNAL Enable_SP                                                  : STD_LOGIC :=
 BEGIN
 
 Enable_SP <= Enable_SP1_MW_out or Enable_SP2_MW_out;
-
+PC_Register_IN <= ALU1_Execute_out when Taken1_Execute_out = '1'
+                else ALU2_Execute_out when Taken2_Execute_out = '1'
+                else PC_Adder_OUT;
 --==========================================================
 PC_Adder:-- For incrementing PC .. PC + 2 
 ENTITY work.my_nadder
@@ -326,7 +330,7 @@ PORT MAP(
 	aa    => "00000000000000000000000000000010",
 	bb    => PC_Register_OUT,
 	c_cin => '0',
-	ff    => PC_Register_IN
+	ff    => PC_Adder_OUT
 );	
 --================ Global Registers ========================
 Program_Counter_Register:
@@ -743,6 +747,10 @@ Execution_Stage:
 ENTITY work.Execution
 GENERIC MAP(n => 16)
 PORT MAP(
+
+        IR1_IN              => IR1_DE_out,
+        IR2_IN              => IR2_DE_out,
+---------------------------------------------------------------
         Flag_Reg            => Flag_Register_OUT,
         dummy_CLK	    => CLK,
         ALU_As_Address1     => ALU_As_Address1_DE_out,
@@ -758,6 +766,7 @@ PORT MAP(
         Two_Operand_Flag1   => Two_Operand_Instr1_Flag_DE_out,
         One_Or_Two_Flag1    => One_or_Two1_DE_out,
 
+        Taken1_OUT          => Taken1_Execute_out,
         ALU1_OUT            => ALU1_Execute_out,
 ----------------------------------------------------------------
         ALU_As_Address2     => ALU_As_Address2_DE_out,
@@ -773,6 +782,7 @@ PORT MAP(
         Two_Operand_Flag2   => Two_Operand_Instr2_Flag_DE_out,
         One_Or_Two_Flag2    => One_or_Two2_DE_out,
 
+        Taken2_OUT          => Taken2_Execute_out,
         ALU2_OUT            => ALU2_Execute_out,
         Flags_OUT           => Flags_Execute_out
 );
