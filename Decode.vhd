@@ -125,7 +125,8 @@ BEGIN
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(2 DOWNTO 0)))); 
 
     ALU1_Operand2_OUT <= "0000000000000000000000000" & IR1_IN(9 DOWNTO 3) when IR1_IN(15 DOWNTO 10)="111101" or IR1_IN(15 DOWNTO 10)="111001"
-        else PC_IN when IR1_IN(15 DOWNTO 13)="010" or IR1_IN(15 DOWNTO 10)="100101"
+        else PC_IN when IR1_IN(15 DOWNTO 13)="010"
+        else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(2 DOWNTO 0)))) when IR1_IN(15 DOWNTO 10)="100101"
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(2 DOWNTO 0)))) when IR1_IN(15 DOWNTO 10)="100011" or IR1_IN(15 DOWNTO 10)="100100"
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(5 DOWNTO 3))));
 
@@ -141,10 +142,10 @@ BEGIN
     CLRC1 <= '1' when IR1_IN(15 DOWNTO 10)="000100"
         else '0';
 
-    Memory_Read1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="001011"
+    Memory_Read1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="100100" or IR1_IN(15 DOWNTO 10)="001011" or IR1_IN(15 DOWNTO 10)="100110"
         else '0';
 
-    Memory_Write1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="001100" or IR1_IN(15 DOWNTO 10)="100011"
+    Memory_Write1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="001100" or IR1_IN(15 DOWNTO 10)="100011" or IR1_IN(15 DOWNTO 10)="100101"
         else '0'; 
 
     -- pop ret rti
@@ -203,7 +204,8 @@ BEGIN
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(2 DOWNTO 0)))); 
 
     ALU2_Operand2_OUT <= "0000000000000000000000000" & IR2_IN(9 DOWNTO 3) when IR2_IN(15 DOWNTO 10)="111101" or IR2_IN(15 DOWNTO 10)="111001"
-        else PC_IN when IR2_IN(15 DOWNTO 13)="010" or IR2_IN(15 DOWNTO 10)="100101"
+        else PC_IN when IR2_IN(15 DOWNTO 13)="010"
+        else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(2 DOWNTO 0)))) when IR2_IN(15 DOWNTO 10)="100101"
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(2 DOWNTO 0)))) when IR2_IN(15 DOWNTO 10)="100011" or IR2_IN(15 DOWNTO 10)="100100"
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(5 DOWNTO 3))));
 
@@ -219,10 +221,10 @@ BEGIN
     CLRC2 <= '1' when IR2_IN(15 DOWNTO 10)="000100"
         else '0';
 
-    Memory_Read2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="001011"
+    Memory_Read2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="100100" or IR2_IN(15 DOWNTO 10)="001011" or IR2_IN(15 DOWNTO 10)="100110"
         else '0';
 
-    Memory_Write2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="001100" or IR2_IN(15 DOWNTO 10)="100011"
+    Memory_Write2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="001100" or IR2_IN(15 DOWNTO 10)="100011" or IR2_IN(15 DOWNTO 10)="100101"
         else '0'; 
 
     -- pop ret rti

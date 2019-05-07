@@ -35,17 +35,11 @@ BEGIN
 		ELSE
 			data_memory(TO_INTEGER(UNSIGNED(Address)))   <= WriteData(15 DOWNTO  0);        -- Normal Write 16 bits
 		END IF;
-		ReadData <= (others => '0');
-	ELSIF(RD = '1') THEN
-		ReadData(15 DOWNTO  0) <= data_memory(TO_INTEGER(UNSIGNED(Address)));
-		IF(TO_INTEGER(UNSIGNED(Address)) = (2**m)-1) THEN
-			ReadData(31 DOWNTO 16) <= (others => '0');
-		ELSE
-			ReadData(31 DOWNTO 16) <= data_memory(TO_INTEGER(UNSIGNED(Address))+1);
-		END IF;
-	ELSE
-		ReadData <= (others => '0');
 	END IF;
 END PROCESS;
 
+ReadData(31 DOWNTO  16) <= data_memory(TO_INTEGER(UNSIGNED(Address))) when RD = '1'
+						else (others => '0');
+ReadData(15 DOWNTO 0) <= data_memory(TO_INTEGER(UNSIGNED(Address)-1)) when RD = '1' and UNSIGNED(Address) > 0
+						else (others => '0');	
 END ARCHITECTURE;

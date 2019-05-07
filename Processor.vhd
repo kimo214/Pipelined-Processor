@@ -30,6 +30,15 @@ SIGNAL Register4_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register5_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register6_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register7_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+
+SIGNAL RST_FD_Buffer1        : STD_LOGIC := '0';
+SIGNAL RST_FD_Buffer2        : STD_LOGIC := '0';
+SIGNAL RST_DE_Buffer1        : STD_LOGIC := '0';
+SIGNAL RST_DE_Buffer2        : STD_LOGIC := '0';
+SIGNAL RST_EM_Buffer1        : STD_LOGIC := '0';
+SIGNAL RST_EM_Buffer2        : STD_LOGIC := '0';
+SIGNAL RST_MW_Buffer1        : STD_LOGIC := '0';
+SIGNAL RST_MW_Buffer2        : STD_LOGIC := '0';
 --------------------------------------------  FETCH TO BUFFER  ----------------------------------------------
 
 signal IR1_Fetch_out, IR2_Fetch_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -190,6 +199,7 @@ signal	Enable_SP2_DE_out, Enable_Reg2_DE_out, Mem_or_ALU2_DE_out			: STD_LOGIC;
 
 signal ALU1_Execute_out, ALU2_Execute_out                                   : STD_LOGIC_VECTOR(31 DOWNTO 0);
 signal Taken1_Execute_out, Taken2_Execute_out                               : STD_LOGIC;
+signal ALU1_Jump_DST, ALU2_Jump_DST                                         : STD_LOGIC_VECTOR(15 DOWNTO 0);
 signal Flags_Execute_out		                                            : STD_LOGIC_VECTOR(2 DOWNTO 0) := (others =>'0');
 
 --------------------------------------------------------------------------------------------------------------     
@@ -246,6 +256,7 @@ signal	Enable_SP2_EM_out, Enable_Reg2_EM_out, Mem_or_ALU2_EM_out			: STD_LOGIC;
 ---------------------------------------------------------------------------------------------------------------     
 --------------------------------------------  Memory to Buffer  ----------------------------------------------
 
+signal RET1_memory_out, RET2_memory_out                                     : STD_LOGIC;
 signal Memory_Memory_out                                                    : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 
@@ -319,10 +330,30 @@ SIGNAL Enable_SP                                                  : STD_LOGIC :=
 BEGIN
 
 Enable_SP <= Enable_SP1_MW_out or Enable_SP2_MW_out;
-PC_Register_IN <= ALU1_Execute_out when Taken1_Execute_out = '1'
-                else ALU2_Execute_out when Taken2_Execute_out = '1'
+PC_Register_IN <= "0000000000000000" & ALU1_Jump_DST when Taken1_Execute_out = '1'
+                else "0000000000000000" & ALU2_Jump_DST when Taken2_Execute_out = '1'
+                else Memory_Memory_out when RET1_memory_out = '1' or RET2_memory_out ='1'
                 else PC_Adder_OUT;
---==========================================================
+
+-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
+-- Jumps Flush Logic
+RST_DE_Buffer1 <= '1' when Taken1_Execute_out = '1' or Taken2_Execute_out = '1'
+                or RET1_memory_out ='1' or RET2_memory_out = '1'
+                else '0';
+RST_DE_Buffer2 <= '1' when Taken1_Execute_out = '1' or Taken2_Execute_out = '1'
+                or RET1_memory_out ='1' or RET2_memory_out = '1'
+                else '0';
+
+RST_EM_Buffer1 <= '1' when RET1_memory_out ='1' or RET2_memory_out = '1'
+                else '0';
+RST_EM_Buffer2 <= '1' when Taken1_Execute_out = '1'
+                or RET1_memory_out ='1' or RET2_memory_out = '1'
+                else '0';
+
+RST_MW_Buffer2 <= '1' when RET1_memory_out = '1'
+                else '0';
+--===========================================================================
 PC_Adder:-- For incrementing PC .. PC + 2 
 ENTITY work.my_nadder
 GENERIC MAP(n => 32)
@@ -352,7 +383,7 @@ GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
 	Reg_RST  => Register_RST,
-	RST_val  => "00000000000011111111111111111111",  -- 2**20 -1
+	RST_val  => "00000000000011111111111111111101",  -- 2**20 -1
 	EN       => Enable_SP,
 	Din      => SP_WB_out,
 
@@ -392,8 +423,9 @@ IF_ID_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => Buffer_RST,
-	
+        EXT_RST1  => RST_FD_Buffer1,
+	EXT_RST2  => RST_FD_Buffer2,
+
 	Stall     => '0',
         Flush     => '0',
 -------------------------------------------------------
@@ -610,8 +642,9 @@ ID_Exe_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => Buffer_RST,
-	
+        EXT_RST1  => RST_DE_Buffer1,
+	EXT_RST2  => RST_DE_Buffer2,
+
 	Stall     => '0',
         Flush     => '0',
 -------------------------------------------------------
@@ -766,6 +799,7 @@ PORT MAP(
         Two_Operand_Flag1   => Two_Operand_Instr1_Flag_DE_out,
         One_Or_Two_Flag1    => One_or_Two1_DE_out,
 
+        ALU1_JMP_DST        => ALU1_Jump_DST,
         Taken1_OUT          => Taken1_Execute_out,
         ALU1_OUT            => ALU1_Execute_out,
 ----------------------------------------------------------------
@@ -782,6 +816,7 @@ PORT MAP(
         Two_Operand_Flag2   => Two_Operand_Instr2_Flag_DE_out,
         One_Or_Two_Flag2    => One_or_Two2_DE_out,
 
+        ALU2_JMP_DST        => ALU2_Jump_DST,
         Taken2_OUT          => Taken2_Execute_out,
         ALU2_OUT            => ALU2_Execute_out,
         Flags_OUT           => Flags_Execute_out
@@ -795,8 +830,9 @@ Exe_Mem_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => Buffer_RST,
-	
+        EXT_RST1  => RST_EM_Buffer1,
+	EXT_RST2  => RST_EM_Buffer2,
+
 	Stall     => '0',
         Flush     => '0',
 ---------------------------------------------------------
@@ -925,6 +961,9 @@ PORT MAP(
         EXT_CLK           => CLK,
         EXT_INTR          => Interrupt,
 
+        IR1_IN             => IR1_EM_out,           -- OLD Registers ***********
+        IR2_IN             => IR2_EM_out,
+
         PC                => PC_EM_out,
         SP                => SP_EM_out,
 
@@ -949,7 +988,9 @@ PORT MAP(
         PC_As_Data2       => PC_As_Data2_EM_out,
 
         ALU2_OUT          => ALU2_Result_EM_out,
-
+        
+        RET1_OUT           => RET1_memory_out,
+        RET2_OUT           => RET2_memory_out,
         Memory_OUT        => Memory_Memory_out
 );
 
@@ -961,8 +1002,9 @@ Mem_WB_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => Buffer_RST,
-	
+        EXT_RST1  => RST_MW_Buffer1,
+	EXT_RST2  => RST_MW_Buffer2,
+
 	Stall     => '0',
         Flush     => '0',
 -------------------------------------------------------------

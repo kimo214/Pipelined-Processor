@@ -78,44 +78,24 @@ PORT MAP(
 );
 
 
-PROCESS(EXT_CLK, Read_Enable, Write_Enable)
-BEGIN
-	IF(Read_Enable = '1' or Write_Enable = '1') THEN
-		-- Determine Which address to use
-		IF(SP_Address = '1') THEN  					-- PUSH Instruction
-			mem_address <= SP(m-1 DOWNTO 0);
-		ELSIF(ALU_As_Address1 = '1') THEN			-- pop instruction Ch1 --> take ALU 1 out
-			mem_address <= ALU1_OUT(m-1 DOWNTO 0);
-		ELSIF(ALU_As_Address2 = '1') THEN			-- pop instruction Ch2 --> take ALU 2 out
-			mem_address <= ALU2_OUT(m-1 DOWNTO 0);
-		ELSIF(Read_Enable1 = '1') THEN				-- Load Instruction
-			mem_address <= ZERO_VECTOR(3 DOWNTO 0) & Rsrc1;
-		ELSIF(Read_Enable2 ='1') THEN
-			mem_address <= ZERO_VECTOR(3 DOWNTO 0) & Rsrc2;
-		ELSIF(Write_Enable1 = '1') THEN				-- store instruction
-			mem_address <= ZERO_VECTOR(3 DOWNTO 0) & Rdst1;
-		ELSIF(Write_Enable2 = '1') THEN
-			mem_address <= ZERO_VECTOR(3 DOWNTO 0) & Rdst2;
-		END IF;
 
-		IF(Write_Enable = '1') THEN
-			IF(mem_PC_data = '1') THEN           	 -- Call instruction
-				mem_data <= PC;               	 	 -- *****NOTE PC or PC+1  not sure yet
-			ELSIF(SP_As_Address1 = '1') THEN     	 -- Push instruction in Ch1  *** May change it to Rsrc not Rdst
-				mem_data <= ZERO_VECTOR(15 downto 0) & Rdst1;	
-			ELSIF(SP_As_Address2 = '1') THEN     	 -- Push Instruction in Ch2  *** Same as above
-				mem_data <= ZERO_VECTOR(15 downto 0) & Rdst2; 
-			ELSIF(Write_Enable1 = '1') THEN      	 -- Store instruction in Ch1
-				mem_data <= ZERO_VECTOR(15 downto 0) & Rsrc1;
-			ELSIF(Write_Enable2 = '1') THEN      	 -- Store instruction in Ch2
-				mem_data <= ZERO_VECTOR(15 downto 0) & Rsrc2;
-			END IF;
-		END IF;
+	
+	mem_address <= SP(m-1 DOWNTO 0) when SP_Address = '1' and (Read_Enable = '1' or Write_Enable = '1') -- PUSH Instruction
+		else ALU1_OUT(m-1 DOWNTO 0) when ALU_As_Address1 = '1' and (Read_Enable = '1' or Write_Enable = '1') -- pop instruction Ch1 --> take ALU 1 out
+		else ALU2_OUT(m-1 DOWNTO 0) when ALU_As_Address2 = '1' and (Read_Enable = '1' or Write_Enable = '1') -- pop instruction Ch2 --> take ALU 2 out
+		else ZERO_VECTOR(3 DOWNTO 0) & Rsrc1 when Read_Enable1 = '1' and (Read_Enable = '1' or Write_Enable = '1') -- Load Instruction
+		else ZERO_VECTOR(3 DOWNTO 0) & Rsrc2 when Read_Enable2 ='1' and (Read_Enable = '1' or Write_Enable = '1')
+		else ZERO_VECTOR(3 DOWNTO 0) & Rdst1 when Write_Enable1 = '1' and (Read_Enable = '1' or Write_Enable = '1') -- store instruction
+		else ZERO_VECTOR(3 DOWNTO 0) & Rdst2 when Write_Enable2 = '1' and (Read_Enable = '1' or Write_Enable = '1'); 
 
-		IF(Read_Enable = '1' and Rising_Edge(EXT_CLK)) THEN
-			Memory_OUT <= mem_read;
-		END IF;
-	END IF;
-END PROCESS;
+
+	mem_data <= std_logic_vector(unsigned(PC)+1) when mem_PC_data = '1' and Write_Enable = '1' -- Call instruction -- *****NOTE PC or PC+1  not sure yet
+		else ZERO_VECTOR(15 downto 0) & Rdst1 when SP_As_Address1 = '1' and Write_Enable = '1' -- Push instruction in Ch1  *** May change it to Rsrc not Rdst
+		else ZERO_VECTOR(15 downto 0) & Rdst2 when SP_As_Address2 = '1' and Write_Enable = '1'	-- Push Instruction in Ch2  *** Same as above
+		else ZERO_VECTOR(15 downto 0) & Rsrc1 when Write_Enable1 = '1' and Write_Enable = '1' -- Store instruction in Ch1
+		else ZERO_VECTOR(15 downto 0) & Rsrc2 when Write_Enable2 = '1' and Write_Enable = '1';
+
+	Memory_OUT <= mem_read;
+
 
 END ARCHITECTURE;

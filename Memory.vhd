@@ -9,6 +9,8 @@ ENTITY Memory IS
         EXT_CLK         	: IN  STD_LOGIC;
         EXT_INTR		: IN  STD_LOGIC;
 
+	IR1_IN				: IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+	IR2_IN				: IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 	PC	      		: IN  STD_LOGIC_VECTOR(31 DOWNTO 0); 
 	SP	      	    	: IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
 
@@ -38,7 +40,8 @@ ENTITY Memory IS
 	
 	ALU2_OUT		: IN  STD_LOGIC_VECTOR( 31 DOWNTO 0);
 
-
+	RET1_OUT			: OUT STD_LOGIC;
+	RET2_OUT			: OUT STD_LOGIC;
 	Memory_OUT		: OUT STD_LOGIC_VECTOR( 31 DOWNTO 0)  
     );
 END ENTITY;
@@ -83,18 +86,23 @@ PORT MAP(
 	mem_address <= SP(m-1 DOWNTO 0) when SP_Address = '1' and (Read_Enable = '1' or Write_Enable = '1') -- PUSH Instruction
 		else ALU1_OUT(m-1 DOWNTO 0) when ALU_As_Address1 = '1' and (Read_Enable = '1' or Write_Enable = '1') -- pop instruction Ch1 --> take ALU 1 out
 		else ALU2_OUT(m-1 DOWNTO 0) when ALU_As_Address2 = '1' and (Read_Enable = '1' or Write_Enable = '1') -- pop instruction Ch2 --> take ALU 2 out
-		else ZERO_VECTOR(3 DOWNTO 0) & Rsrc1 when Read_Enable1 = '1' and (Read_Enable = '1' or Write_Enable = '1') -- Load Instruction
-		else ZERO_VECTOR(3 DOWNTO 0) & Rsrc2 when Read_Enable2 ='1' and (Read_Enable = '1' or Write_Enable = '1')
-		else ZERO_VECTOR(3 DOWNTO 0) & Rdst1 when Write_Enable1 = '1' and (Read_Enable = '1' or Write_Enable = '1') -- store instruction
-		else ZERO_VECTOR(3 DOWNTO 0) & Rdst2 when Write_Enable2 = '1' and (Read_Enable = '1' or Write_Enable = '1'); 
+		else ZERO_VECTOR(3 DOWNTO 0) & Rsrc1 when ALU_As_Address1 = '0' and Read_Enable1 = '1'  -- Load Instruction
+		else ZERO_VECTOR(3 DOWNTO 0) & Rsrc2 when ALU_As_Address2 = '0' and Read_Enable2 ='1' 
+		else ZERO_VECTOR(3 DOWNTO 0) & Rdst1 when SP_Address = '0' and Write_Enable1 = '1'  -- store instruction
+		else ZERO_VECTOR(3 DOWNTO 0) & Rdst2 when SP_Address = '0' and Write_Enable2 = '1'; 
 
 
-	mem_data <= PC when mem_PC_data = '1' and Write_Enable = '1' -- Call instruction -- *****NOTE PC or PC+1  not sure yet
+	mem_data <= std_logic_vector(unsigned(PC)+1) when mem_PC_data = '1' and Write_Enable = '1' -- Call instruction -- *****NOTE PC or PC+1  not sure yet
 		else ZERO_VECTOR(15 downto 0) & Rdst1 when SP_As_Address1 = '1' and Write_Enable = '1' -- Push instruction in Ch1  *** May change it to Rsrc not Rdst
 		else ZERO_VECTOR(15 downto 0) & Rdst2 when SP_As_Address2 = '1' and Write_Enable = '1'	-- Push Instruction in Ch2  *** Same as above
 		else ZERO_VECTOR(15 downto 0) & Rsrc1 when Write_Enable1 = '1' and Write_Enable = '1' -- Store instruction in Ch1
 		else ZERO_VECTOR(15 downto 0) & Rsrc2 when Write_Enable2 = '1' and Write_Enable = '1';
 
+	RET1_OUT <= '1' when IR1_IN(15 DOWNTO 10) = "100110"
+				else '0';
+	RET2_OUT <= '1' when IR2_IN(15 DOWNTO 10) = "100110"
+				else '0';
+	
 	Memory_OUT <= mem_read;
 
 

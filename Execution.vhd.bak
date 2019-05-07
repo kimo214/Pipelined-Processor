@@ -27,6 +27,7 @@ ENTITY Execution IS
 	One_Or_Two_Flag1	:	IN  STD_LOGIC;				-- 0 --> 1  or 1 --> 2
 	
 
+	ALU1_JMP_DST		:   OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 	Taken1_OUT			:   OUT STD_LOGIC;	
 	ALU1_OUT		:	OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 
@@ -43,6 +44,7 @@ ENTITY Execution IS
 	Two_Operand_Flag2	:	IN  STD_LOGIC;
 	One_Or_Two_Flag2	:	IN  STD_LOGIC;				-- 0 --> 1  or 1 --> 2
 
+	ALU2_JMP_DST		:   OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 	Taken2_OUT			:   OUT  STD_LOGIC;
 	ALU2_OUT		:	OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 
@@ -64,7 +66,7 @@ SIGNAL ALU1_Result	: STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL ALU2_Cout	: STD_LOGIC;
 SIGNAL ALU2_Result	: STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 
---SIGNAL Flags_OUT	: STD_LOGIC_VECTOR( 2 DOWNTO 0) := "000";
+SIGNAL new_Flags	: STD_LOGIC_VECTOR( 2 DOWNTO 0) := "000";
 
 SIGNAL ALU1_Enable	: STD_LOGIC;
 SIGNAL ALU2_Enable	: STD_LOGIC;
@@ -127,51 +129,76 @@ BEGIN
 	-- SP isnt an operand because operations on SP dont affect flags 
 	-- Zero Flag
 	IF(SP_As_Address2 = '0' and ALU_As_Address2 = '0' and ALU2_Enable = '1' and ALU2_Result(15 downto 0) = ZERO_VECTOR(15 downto 0)) THEN  -- Result is 0
-		Flags_OUT(0) <= '1';
+		new_Flags(0) <= '1';
 	ELSIF(SP_As_Address2 = '0' and ALU_As_Address2 = '0' and ALU2_Enable = '1') THEN
-		Flags_OUT(0) <= '0';      -- Result isNOT 0
+		new_Flags(0) <= '0';      
 	ELSIF(SP_As_Address1 = '0' and ALU_As_Address1 = '0' and ALU1_Enable = '1' and ALU1_Result(15 downto 0) = ZERO_VECTOR(15 downto 0)) THEN
-		Flags_OUT(0) <= '1';
+		new_Flags(0) <= '1';
 	ELSIF(SP_As_Address1 = '0' and ALU_As_Address1 = '0' and ALU1_Enable = '1') THEN
-		Flags_OUT(0) <= '0';
+		new_Flags(0) <= '0';
 	ELSE
-		Flags_OUT(0) <= Flag_Reg(0);
+		new_Flags(0) <= Flag_Reg(0);
 	END IF;
 	-- Negative FLag
 	IF(SP_As_Address2 = '0' and ALU_As_Address2 = '0' and ALU2_Enable = '1' and ALU2_Result(31) = '1') THEN
-		Flags_OUT(1) <= '1';
+		new_Flags(1) <= '1';
 	ELSIF(SP_As_Address2 = '0' and ALU_As_Address2 = '0' and ALU2_Enable = '1') THEN
-		Flags_OUT(1) <= '0';
+		new_Flags(1) <= '0';
 	ELSIF(SP_As_Address1 = '0' and ALU_As_Address1 = '0' and ALU1_Enable = '1' and ALU1_Result(31) = '1') THEN
-		Flags_OUT(1) <= '1';
+		new_Flags(1) <= '1';
 	ELSIF(SP_As_Address1 = '0' and ALU_As_Address1 = '0' and ALU1_Enable = '1') THEN
-		Flags_OUT(1) <= '0';
+		new_Flags(1) <= '0';
 	ELSE
-		Flags_OUT(1) <= Flag_Reg(1);
+		new_Flags(1) <= Flag_Reg(1);
 	END IF;
 	-- Carry Flag
 	IF((SP_As_Address2 = '0' and ALU_As_Address2 = '0' and Arithmatic_Shift2 = '1' and ALU2_Cout = '1') or SET_Carry2 = '1') THEN
-		Flags_OUT(2) <= '1';
+		new_Flags(2) <= '1';
 	ELSIF((SP_As_Address2 = '0' and ALU_As_Address2 = '0' and Arithmatic_Shift2 = '1' and ALU2_Cout = '0') or CLR_Carry2 = '1') THEN
-		Flags_OUT(2) <= '0';
+		new_Flags(2) <= '0';
 	ELSIF((SP_As_Address1 = '0' and ALU_As_Address1 = '0' and Arithmatic_Shift1 = '1' and ALU1_Cout = '1') or SET_Carry1 = '1') THEN
-		Flags_OUT(2) <= '1';
+		new_Flags(2) <= '1';
 	ELSIF((SP_As_Address1 = '0' and ALU_As_Address1 = '0' and Arithmatic_Shift1 = '1' and ALU1_Cout = '0') or CLR_Carry1 = '1') THEN
-		Flags_OUT(2) <= '0';
+		new_Flags(2) <= '0';
 	ELSE
-		Flags_OUT(2) <= Flag_Reg(2);
+		new_Flags(2) <= Flag_Reg(2);
 	END IF;
 
 END PROCESS;
 
 -------------------------------------------------------------------------------------------------------------------------------
 
-Taken1_OUT <= '1' when (IR1_IN(15 DOWNTO 11)="01011")   -- JMP Instruction
-		else '0';
-Taken2_OUT <= '1' when (IR2_IN(15 DOWNTO 11)="01011");   -- JMP Instruction
+ALU1_JMP_DST <= Operand1_ALU1(15 DOWNTO 0) when (IR1_IN(15 DOWNTO 11) = "01011")
+			or ((IR1_IN(15 DOWNTO 11) = "01000") and new_Flags(0) = '1')	-- JZ  Instruction
+			or ((IR1_IN(15 DOWNTO 11) = "01001") and new_Flags(1) = '1')	-- JN  Instruction
+			or ((IR1_IN(15 DOWNTO 11) = "01010") and new_Flags(2) = '1')	-- JC  Instruction
+			or (IR1_IN(15 DOWNTO 10) = "100101")							-- Call Instruction
+			else Operand2_ALU1(15 DOWNTO 0)
+
+Taken1_OUT <= '1' when (IR1_IN(15 DOWNTO 11) = "01011")   				-- JMP Instruction
+		or ((IR1_IN(15 DOWNTO 11) = "01000") and new_Flags(0) = '1')	-- JZ  Instruction
+		or ((IR1_IN(15 DOWNTO 11) = "01001") and new_Flags(1) = '1')	-- JN  Instruction
+		or ((IR1_IN(15 DOWNTO 11) = "01010") and new_Flags(2) = '1')	-- JC  Instruction
+		or (IR1_IN(15 DOWNTO 10) = "100101")							-- Call Instruction
 		else '0';
 
 
+
+ALU2_JMP_DST <= Operand1_ALU2(15 DOWNTO 0) when (IR2_IN(15 DOWNTO 11) = "01011")-- JMP Instruction 
+			or ((IR2_IN(15 DOWNTO 11) = "01000") and new_Flags(0) = '1')		-- JZ  Instruction
+			or ((IR2_IN(15 DOWNTO 11) = "01001") and new_Flags(1) = '1')		-- JN  Instruction
+			or ((IR2_IN(15 DOWNTO 11) = "01010") and new_Flags(2) = '1')		-- JC  Instruction
+			or (IR2_IN(15 DOWNTO 10) = "100101")								-- Call Instruction
+			else Operand2_ALU2(15 DOWNTO 0)
+
+Taken2_OUT <= '1' when (IR2_IN(15 DOWNTO 11) = "01011")   				-- JMP Instruction
+		or ((IR2_IN(15 DOWNTO 11) = "01000") and new_Flags(0) = '1')	-- JZ  Instruction
+		or ((IR2_IN(15 DOWNTO 11) = "01001") and new_Flags(1) = '1')	-- JN  Instruction
+		or ((IR2_IN(15 DOWNTO 11) = "01010") and new_Flags(2) = '1')	-- JC  Instruction
+		or (IR2_IN(15 DOWNTO 10) = "100101")							-- Call Instruction
+		else '0';
+
+Flags_OUT <= new_Flags;
 ALU1_OUT <= ALU1_Result;
 ALU2_OUT <= ALU2_Result;
 
