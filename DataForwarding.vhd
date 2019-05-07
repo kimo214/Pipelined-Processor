@@ -26,7 +26,8 @@ BEGIN
     else '0';
 
     Second <= '1' when (
-        (IR_crnt(15 DOWNTO 13)="110" or IR_crnt(15 DOWNTO 10)="100011" or IR_crnt(15 DOWNTO 11)="10010") and Rdst_crnt=Rdst_last 
+        (IR_crnt(15 DOWNTO 13)="110" or IR_crnt(15 DOWNTO 10)="100011" 
+        or IR_crnt(15 DOWNTO 11)="10010" or IR_crnt(15 DOWNTO 10)="001100" or IR_crnt(15 DOWNTO 10)="001011" ) and Rdst_crnt=Rdst_last 
     )
     else '0';
 
