@@ -97,6 +97,11 @@ signal	Enable_SP2_FD_out, Enable_Reg2_FD_out, Mem_or_ALU2_FD_out			: STD_LOGIC;
 --------------------------------------------------------------------------------------------------------------     
 --------------------------------------------   Decode TO Buffer  ----------------------------------------------
 
+signal ALU_Forwarding1last1, First_op1last1, Second_op1last1, ALU_Forwarding1last2, First_op1last2, Second_op1last2 : STD_LOGIC; 
+signal ALU_Forwarding1lastlast1, First_op1lastlast1, Second_op1lastlast1, ALU_Forwarding1lastlast2, First_op1lastlast2, Second_op1lastlast2 : STD_LOGIC; 
+signal ALU_Forwarding2last1, First_op2last1, Second_op2last1,ALU_Forwarding2last2, First_op2last2, Second_op2last2 : STD_LOGIC;
+signal ALU_Forwarding2lastlast1, First_op2lastlast1, Second_op2lastlast1,ALU_Forwarding2lastlast2, First_op2lastlast2, Second_op2lastlast2 : STD_LOGIC;
+
 ---- For Channel 1 -> ALU 1
         
 signal	NOP1_Decode_out, Taken1_Decode_out, SET_Carry1_Decode_out, CLR_Carry1_Decode_out,
@@ -145,6 +150,12 @@ signal	Enable_SP2_Decode_out, Enable_Reg2_Decode_out,
 
 --------------------------------------------------------------------------------------------------------------     
 --------------------------------------------  ID\Ex Buffer  ----------------------------------------------
+
+
+signal	ALU1_Operand1_E_in, ALU1_Operand2_E_in : STD_LOGIC_VECTOR(31 downto 0);
+signal	ALU2_Operand1_E_in, ALU2_Operand2_E_in : STD_LOGIC_VECTOR(31 downto 0); 
+
+
 
 signal	IR1_DE_out, IR2_DE_out       		                                :  STD_LOGIC_VECTOR(15 DOWNTO 0);
 	    
@@ -634,8 +645,10 @@ PORT MAP(
 );
 
 
---========================================================================
---============================  DE Buffer ======================================
+
+
+--===============================================================
+--============================  DE Buffer =======================
 --===============================================================
 
 ID_Exe_Buffer:
@@ -772,6 +785,146 @@ PORT MAP(
         Mem_or_ALU2_OUT      => Mem_or_ALU2_DE_out
 );
 
+--First DataForwarding Component
+DataForwarding1last1:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR1_EM_out,
+        IR_crnt         => IR1_DE_out,         
+        Rdst_last       => Rdst_Idx1_EM_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,
+        ALU_Forward     => ALU_Forwarding1last1,
+        FirstOperand    => First_op1last1,
+        SecondOperand   => Second_op1last1
+);
+
+DataForwarding1last2:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR2_EM_out,
+        IR_crnt         => IR1_DE_out,         
+        Rdst_last       => Rdst_Idx2_EM_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,
+        ALU_Forward     => ALU_Forwarding1last2,
+        FirstOperand    => First_op1last2,
+        SecondOperand   => Second_op1last2
+);
+
+DataForwarding1lastlast1:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR1_MW_out,
+        IR_crnt         => IR1_DE_out,         
+        Rdst_last       => Rdst_Idx1_MW_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,
+        ALU_Forward     => ALU_Forwarding1lastlast1,
+        FirstOperand    => First_op1lastlast1,
+        SecondOperand   => Second_op1lastlast1
+);
+
+DataForwarding1lastlast2:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR2_MW_out,
+        IR_crnt         => IR1_DE_out,         
+        Rdst_last       => Rdst_Idx2_MW_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,
+        ALU_Forward     => ALU_Forwarding1lastlast2,
+        FirstOperand    => First_op1lastlast2,
+        SecondOperand   => Second_op1lastlast2
+);
+
+ALU1_Operand1_E_in <= ALU1_Result_EM_out when (First_op1last1='1' and ALU_Forwarding1last1='1') 
+else ALU2_Result_EM_out when (First_op1last2='1' and ALU_Forwarding1last2='1')
+else ALU1_Result_MW_out when (First_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
+else ALU2_Result_MW_out when (First_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+else ALU1_Operand1_DE_out;
+
+ALU1_Operand2_E_in <= ALU1_Result_EM_out when (Second_op1last1='1' and ALU_Forwarding1last1='1') 
+else ALU2_Result_EM_out when (Second_op1last2='1' and ALU_Forwarding1last2='1')
+else ALU1_Result_MW_out when (Second_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
+else ALU2_Result_MW_out when (Second_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+else ALU1_Operand2_DE_out;
+
+
+--Second DataForwarding Component
+DataForwarding2last1:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR1_EM_out,
+        IR_crnt         => IR2_DE_out,         
+        Rdst_last       => Rdst_Idx1_EM_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,
+        ALU_Forward     => ALU_Forwarding2last1,
+        FirstOperand    => First_op2last1,
+        SecondOperand   => Second_op2last1
+);
+
+DataForwarding2last2:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR2_EM_out,
+        IR_crnt         => IR2_DE_out,         
+        Rdst_last       => Rdst_Idx2_EM_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,
+        ALU_Forward     => ALU_Forwarding2last2,
+        FirstOperand    => First_op2last2,
+        SecondOperand   => Second_op2last2
+);
+
+DataForwarding2lastlast1:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR1_MW_out,
+        IR_crnt         => IR2_DE_out,         
+        Rdst_last       => Rdst_Idx1_MW_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,
+        ALU_Forward     => ALU_Forwarding2lastlast1,
+        FirstOperand    => First_op2lastlast1,
+        SecondOperand   => Second_op2lastlast1
+);
+
+DataForwarding2lastlast2:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR2_MW_out,
+        IR_crnt         => IR2_DE_out,         
+        Rdst_last       => Rdst_Idx2_MW_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,
+        ALU_Forward     => ALU_Forwarding2lastlast2,
+        FirstOperand    => First_op2lastlast2,
+        SecondOperand   => Second_op2lastlast2
+);
+
+ALU2_Operand1_E_in <= ALU1_Result_EM_out when (First_op2last1='1' and ALU_Forwarding2last1='1') 
+else ALU2_Result_EM_out when (First_op2last2='1' and ALU_Forwarding2last2='1')
+else ALU1_Result_MW_out when (First_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
+else ALU2_Result_MW_out when (First_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
+else ALU2_Operand1_DE_out;
+
+ALU2_Operand2_E_in <= ALU1_Result_EM_out when (Second_op2last1='1' and ALU_Forwarding2last1='1')
+else ALU2_Result_EM_out when (Second_op2last2='1' and ALU_Forwarding2last2='1')
+else ALU1_Result_MW_out when (Second_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
+else ALU2_Result_MW_out when (Second_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
+else ALU2_Operand2_DE_out;
+
+
 --=============================================================
 --===================== Execution Stage ==========================
 --=============================================================
@@ -793,8 +946,8 @@ PORT MAP(
 
         ALU1_Operation_Code => ALU1_OP_Code_DE_out,
 
-        Operand1_ALU1       => ALU1_Operand1_DE_out,
-        Operand2_ALU1       => ALU1_Operand2_DE_out,
+        Operand1_ALU1       => ALU1_Operand1_E_in,
+        Operand2_ALU1       => ALU1_Operand2_E_in,
 
         Two_Operand_Flag1   => Two_Operand_Instr1_Flag_DE_out,
         One_Or_Two_Flag1    => One_or_Two1_DE_out,
@@ -810,8 +963,8 @@ PORT MAP(
 
         ALU2_Operation_Code => ALU2_OP_Code_DE_out,
 
-        Operand1_ALU2       => ALU2_Operand1_DE_out,
-        Operand2_ALU2       => ALU2_Operand2_DE_out,
+        Operand1_ALU2       => ALU2_Operand1_E_in,
+        Operand2_ALU2       => ALU2_Operand2_E_in,
 
         Two_Operand_Flag2   => Two_Operand_Instr2_Flag_DE_out,
         One_Or_Two_Flag2    => One_or_Two2_DE_out,
