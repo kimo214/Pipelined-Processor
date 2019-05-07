@@ -5,7 +5,7 @@ USE IEEE.math_real.all;
 
 ENTITY Processor is
     port( CLK, Register_RST, Buffer_RST, Interrupt: IN  STD_LOGIC;
-          pport : INOUT STD_LOGIC_Vector(15 Downto 0)
+          pport : INOUT STD_LOGIC_Vector(15 Downto 0) := (others => '0')
     );
 END ENTITY;
 
@@ -938,6 +938,7 @@ PORT MAP(
         IR2_IN              => IR2_DE_out,
 
         IR1_IN_NXT          => IR1_FD_out,                       -- IR1 of the next packet
+        INPUT_PORT          => pport,
 ---------------------------------------------------------------
         Flag_Reg            => Flag_Register_OUT,
         dummy_CLK	    => CLK,
@@ -974,6 +975,8 @@ PORT MAP(
         ALU2_JMP_DST        => ALU2_Jump_DST,
         Taken2_OUT          => Taken2_Execute_out,
         ALU2_OUT            => ALU2_Execute_out,
+
+        OUT_PORT            => pport,
         Flags_OUT           => Flags_Execute_out
 );
 
@@ -1284,14 +1287,15 @@ PORT MAP(
 WriteBack_Stage:
 ENTITY work.WB
 PORT MAP(
+        IR1_IN    =>  IR1_MW_out,
+        IR2_IN    =>  IR2_MW_out,
+
         ALU1      =>  ALU1_Result_MW_out,
         ALU2      =>  ALU2_Result_MW_out,
         SP        =>  SP_MW_out,
         MEM       =>  Memory_Result_MW_out,
         
-        InPort    =>  (others => '0'),  ---------TO BE DONE***********************
-        inS1      =>  '0',              ---------TO BE DONE***********************
-        inS2      =>  '0',              ---------TO BE DONE***********************
+        InPort    =>  pport,
 
         S1        =>  Mem_or_ALU1_MW_out,
         S2        =>  Mem_or_ALU2_MW_out,

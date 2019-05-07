@@ -11,6 +11,7 @@ ENTITY Execution IS
     IR2_IN         			            : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 
 	IR1_IN_NXT							: IN  STD_LOGIC_VECTOR(15 DOWNTO 0);		-- IR1 of the next packet
+	INPUT_PORT							: IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 -----------------------------------------------------------------------------------	
 	Flag_Reg		:	IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 	dummy_CLK		:	IN  STD_LOGIC;
@@ -29,7 +30,7 @@ ENTITY Execution IS
 	
 
 	ALU1_JMP_DST		:   OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-	Taken1_OUT			:   OUT STD_LOGIC;	
+	Taken1_OUT			:   INOUT STD_LOGIC;	
 	ALU1_OUT		:	OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 ------------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ ENTITY Execution IS
 	Taken2_OUT			:   OUT  STD_LOGIC;
 	ALU2_OUT		:	OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 
+	OUT_PORT			: OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 	Flags_OUT		:	OUT STD_LOGIC_VECTOR( 2 DOWNTO 0)
     );
 END ENTITY;
@@ -176,7 +178,7 @@ BEGIN
 END PROCESS;
 
 -------------------------------------------------------------------------------------------------------------------------------
-
+--- Jumps
 ALU1_JMP_DST <= Operand1_ALU1(15 DOWNTO 0) when (IR1_IN(15 DOWNTO 11) = "01011")  -- Check on OLD FLAGS
 			or ((IR1_IN(15 DOWNTO 11) = "01000") and Flag_Reg(0) = '1')		-- JZ  Instruction  
 			or ((IR1_IN(15 DOWNTO 11) = "01001") and Flag_Reg(1) = '1')		-- JN  Instruction
@@ -205,6 +207,22 @@ Taken2_OUT <= '1' when (IR2_IN(15 DOWNTO 11) = "01011")   				-- JMP Instruction
 		or (IR2_IN(15 DOWNTO 10) = "100101")							-- Call Instruction
 		else '0';
 
+-------------------------------------------------------------------------------------------------------------------
+OUT_PORT_LOGIC:
+PROCESS(dummy_CLK)
+BEGIN
+	IF(FALLING_EDGE(dummy_CLK)) THEN															--- Make sure that Ch1 wont jump
+		IF(IR2_IN(15 DOWNTO 10) = "001001" and IR1_IN(15 DOWNTO 10) /= "001001" and Taken1_OUT = '0') THEN
+			OUT_PORT <= ALU2_Operand1(15 DOWNTO 0);												--- Ch2 out while ch1 isn't out
+		ELSIF(IR1_IN(15 DOWNTO 10) = "001001" and IR2_IN(15 DOWNTO 10) /= "001001")	THEN		--- Ch1 out while ch2 isnt out
+			OUT_PORT <= ALU1_Operand1(15 DOWNTO 0);
+		ELSE 
+			OUT_PORT <= INPUT_PORT;
+		END IF;
+	END IF;
+END PROCESS;
+
+----------------------------------------------------------------------------------------------------------------------
 Flags_OUT <= new_Flags;
 ALU1_OUT <= ALU1_Result;
 ALU2_OUT <= ALU2_Result;

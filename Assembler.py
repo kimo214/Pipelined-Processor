@@ -1,6 +1,6 @@
 
 TwoOp = ['SHR','SHL','LDM','ADD','SUB','AND','OR','MOV','LDD','STD']
-OneOp = ['NOT','INC','DEC','PUSH','POP','CALL','IN','OUT','JZ','JN','JC','JMP']
+OneOp = ['IN','OUT','NOT','INC','DEC','PUSH','POP','CALL','JZ','JN','JC','JMP']
 
 #Commands = ['SHR','SHL','ADD','SUB','AND','OR','MOV','LDM','LDD','STD',,'RET','RTI','NOP','CLRC','SETC']
 OpCode = {
@@ -89,8 +89,13 @@ for L in lines:
 
     elif OneOp.count(Instruction) > 0:
         Operand1 = Words[1].upper()
-        IR = IR.ljust(13,'0')
-        IR += GetRegIdx(Operand1[1])
+        if(OneOp.index(Instruction) <= 1):
+            IR = IR.ljust(10,'0')
+            IR += GetRegIdx(Operand1[1])
+            IR += '000'
+        else:
+            IR = IR.ljust(13,'0')
+            IR += GetRegIdx(Operand1[1])
     else:
         IR = IR.ljust(16,'0') 
 
