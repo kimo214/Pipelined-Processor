@@ -101,6 +101,8 @@ for L in lines:
     print(IR)
     Out.write('\n')
     if(Value != ""):
+        Out.write(str(i)+': ')
+        i += 1
         Out.write(Value)
         Out.write('\n')
     #-------------------------

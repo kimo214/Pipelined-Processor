@@ -162,12 +162,13 @@ BEGIN
 
     Rdst_Idx1_OUT <= IR1_IN(5 DOWNTO 3) when IR1_IN(15 DOWNTO 13)="110" or IR1_IN(15 DOWNTO 13)="000" or IR1_IN(15 DOWNTO 13)="001"
         else IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 10)="111001" or IR1_IN(15 DOWNTO 10)="111101" --shift
-        else IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 13)="100" or IR1_IN(15 DOWNTO 13)="010"; 
+        else IR1_IN(2 DOWNTO 0) when IR1_IN(15 DOWNTO 13)="100" or IR1_IN(15 DOWNTO 13)="010"
+        else IR1_IN(5 DOWNTO 3) when IR1_IN(15 DOWNTO 10)="001010"; 
         
     Enable_SP1_OUT <= '1' when IR1_IN(15 DOWNTO 12)="1001" or IR1_IN(15 DOWNTO 10)="100011"
         else '0'; 
 
-    Mem_or_ALU1_OUT <= '1' when IR1_IN(15 DOWNTO 11)="00101" or IR1_IN(15 DOWNTO 10)="100100"
+    Mem_or_ALU1_OUT <= '1' when IR1_IN(15 DOWNTO 10)="001011" or IR1_IN(15 DOWNTO 10)="100100"
         else '0';
 
     Enable_Reg1_OUT <= '0' when IR1_IN(15 DOWNTO 10)="000000" or IR1_IN(15 DOWNTO 10)="000110" 
@@ -241,12 +242,13 @@ BEGIN
 
     Rdst_Idx2_OUT <= IR2_IN(5 DOWNTO 3) when IR2_IN(15 DOWNTO 13)="110" or IR2_IN(15 DOWNTO 13)="000" or IR2_IN(15 DOWNTO 13)="001"
         else IR2_IN(2 DOWNTO 0) when IR2_IN(15 DOWNTO 10)="111001" or IR2_IN(15 DOWNTO 10)="111101" --shift
-        else IR2_IN(2 DOWNTO 0) when IR2_IN(15 DOWNTO 13)="100" or IR2_IN(15 DOWNTO 13)="010"; 
+        else IR2_IN(2 DOWNTO 0) when IR2_IN(15 DOWNTO 13)="100" or IR2_IN(15 DOWNTO 13)="010"
+        else IR2_IN(5 DOWNTO 3) when IR2_IN(15 DOWNTO 10)="001010"; 
 
     Enable_SP2_OUT <= '1' when IR2_IN(15 DOWNTO 12)="1001" or IR2_IN(15 DOWNTO 10)="100011"
         else '0'; 
 
-    Mem_or_ALU2_OUT <= '1' when IR2_IN(15 DOWNTO 11)="00101" or IR2_IN(15 DOWNTO 10)="100100"
+    Mem_or_ALU2_OUT <= '1' when IR2_IN(15 DOWNTO 10)="001011" or IR2_IN(15 DOWNTO 10)="100100"
         else '0';
 
     Enable_Reg2_OUT <= '0' when IR2_IN(15 DOWNTO 10)="000000" or IR2_IN(15 DOWNTO 10)="000110" 

@@ -936,6 +936,8 @@ PORT MAP(
 
         IR1_IN              => IR1_DE_out,
         IR2_IN              => IR2_DE_out,
+
+        IR1_IN_NXT          => IR1_FD_out,                       -- IR1 of the next packet
 ---------------------------------------------------------------
         Flag_Reg            => Flag_Register_OUT,
         dummy_CLK	    => CLK,

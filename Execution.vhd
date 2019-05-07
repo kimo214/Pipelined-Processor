@@ -10,6 +10,7 @@ ENTITY Execution IS
     IR1_IN         		                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
     IR2_IN         			            : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 
+	IR1_IN_NXT							: IN  STD_LOGIC_VECTOR(15 DOWNTO 0);		-- IR1 of the next packet
 -----------------------------------------------------------------------------------	
 	Flag_Reg		:	IN  STD_LOGIC_VECTOR(2 DOWNTO 0);
 	dummy_CLK		:	IN  STD_LOGIC;
@@ -57,6 +58,9 @@ ARCHITECTURE arch_Execution OF Execution IS
 
 SIGNAL ZERO_VECTOR	: STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 
+SIGNAL ALU1_Operand1    : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+SIGNAL ALU2_Operand1    : STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
+
 SIGNAL ALU1_Operand2	: STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 SIGNAL ALU2_Operand2	: STD_LOGIC_VECTOR(31 DOWNTO 0) := (others => '0');
 
@@ -90,7 +94,7 @@ ALU1:
 ENTITY work.ALU
 GENERIC MAP(n => 32)
 PORT MAP(
-	Operand1   => Operand1_ALU1,
+	Operand1   => ALU1_Operand1,
 	Operand2   => ALU1_Operand2,  
 	Operation  => ALU1_Operation_Code,
 	
@@ -102,13 +106,18 @@ ALU2:
 ENTITY work.ALU
 GENERIC MAP(n => 32)
 PORT MAP(
-	Operand1   => Operand1_ALU2,
+	Operand1   => ALU2_Operand1,
 	Operand2   => ALU2_Operand2,  
 	Operation  => ALU2_Operation_Code,
 
 	Carry_OUT  => ALU2_Cout,
 	ALU_OUTPUT => ALU2_Result
 );
+
+	ALU1_Operand1 <= ZERO_VECTOR(15 DOWNTO 0) & IR2_IN when IR1_IN(15 DOWNTO 10) = "001010"
+					else Operand1_ALU1;
+	ALU2_Operand1 <= ZERO_VECTOR(15 DOWNTO 0) & IR1_IN_NXT when IR2_IN(15 DOWNTO 10) = "001010"
+					else Operand1_ALU2;
 
 	ALU1_Operand2 <= Operand2_ALU1 when Two_Operand_Flag1 = '1' 
 		else ZERO_VECTOR(31 DOWNTO 2) & "10" when One_Or_Two_Flag1 = '1'
@@ -168,17 +177,17 @@ END PROCESS;
 
 -------------------------------------------------------------------------------------------------------------------------------
 
-ALU1_JMP_DST <= Operand1_ALU1(15 DOWNTO 0) when (IR1_IN(15 DOWNTO 11) = "01011")
-			or ((IR1_IN(15 DOWNTO 11) = "01000") and new_Flags(0) = '1')	-- JZ  Instruction
-			or ((IR1_IN(15 DOWNTO 11) = "01001") and new_Flags(1) = '1')	-- JN  Instruction
-			or ((IR1_IN(15 DOWNTO 11) = "01010") and new_Flags(2) = '1')	-- JC  Instruction
+ALU1_JMP_DST <= Operand1_ALU1(15 DOWNTO 0) when (IR1_IN(15 DOWNTO 11) = "01011")  -- Check on OLD FLAGS
+			or ((IR1_IN(15 DOWNTO 11) = "01000") and Flag_Reg(0) = '1')		-- JZ  Instruction  
+			or ((IR1_IN(15 DOWNTO 11) = "01001") and Flag_Reg(1) = '1')		-- JN  Instruction
+			or ((IR1_IN(15 DOWNTO 11) = "01010") and Flag_Reg(2) = '1')		-- JC  Instruction
 			else Operand2_ALU1(15 DOWNTO 0);								-- Call Instruction
 
-Taken1_OUT <= '1' when (IR1_IN(15 DOWNTO 11) = "01011")   				-- JMP Instruction
-		or ((IR1_IN(15 DOWNTO 11) = "01000") and new_Flags(0) = '1')	-- JZ  Instruction
-		or ((IR1_IN(15 DOWNTO 11) = "01001") and new_Flags(1) = '1')	-- JN  Instruction
-		or ((IR1_IN(15 DOWNTO 11) = "01010") and new_Flags(2) = '1')	-- JC  Instruction
-		or (IR1_IN(15 DOWNTO 10) = "100101")							-- Call Instruction
+Taken1_OUT <= '1' when (IR1_IN(15 DOWNTO 11) = "01011")   					-- JMP Instruction
+		or ((IR1_IN(15 DOWNTO 11) = "01000") and Flag_Reg(0) = '1')			-- JZ  Instruction
+		or ((IR1_IN(15 DOWNTO 11) = "01001") and Flag_Reg(1) = '1')			-- JN  Instruction
+		or ((IR1_IN(15 DOWNTO 11) = "01010") and Flag_Reg(2) = '1')			-- JC  Instruction
+		or (IR1_IN(15 DOWNTO 10) = "100101")								-- Call Instruction
 		else '0';
 
 
