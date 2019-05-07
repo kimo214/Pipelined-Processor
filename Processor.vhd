@@ -394,7 +394,7 @@ GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
 	Reg_RST  => Register_RST,
-	RST_val  => "00000000000011111111111111111101",  -- 2**20 -1
+	RST_val  => "00000000000011111111111111111111",  -- 2**20 -1
 	EN       => Enable_SP,
 	Din      => SP_WB_out,
 
