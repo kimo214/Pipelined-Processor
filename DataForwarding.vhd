@@ -17,16 +17,16 @@ signal First, Second : STD_LOGIC;
 BEGIN
 
     First <= '1' when (
-        ((  IR_last(15 DOWNTO 14)="11" or IR_last(15 DOWNTO 11)="00001"
-            or IR_last(15 DOWNTO 10)="001011" or IR_last(15 DOWNTO 10)="001100") and Rsrc_crnt=Rdst_last)
+        ((  IR_crnt(15 DOWNTO 14)="11" or IR_crnt(15 DOWNTO 11)="00001"
+            or IR_crnt(15 DOWNTO 10)="001011" or IR_crnt(15 DOWNTO 10)="001100") and Rsrc_crnt=Rdst_last)
         
-        or ((   (IR_last(15 DOWNTO 12)="1000" and IR_last(11 DOWNTO 10)/="11") 
-                or IR_last(15 DOWNTO 13)="010" ) and Rdst_crnt=Rdst_last) 
+        or ((   (IR_crnt(15 DOWNTO 12)="1000" and IR_crnt(11 DOWNTO 10)/="11") 
+                or IR_crnt(15 DOWNTO 13)="010" ) and Rdst_crnt=Rdst_last) 
     )
     else '0';
 
     Second <= '1' when (
-        (IR_last(15 DOWNTO 13)="110" or IR_last(15 DOWNTO 10)="100011" or IR_last(15 DOWNTO 11)="10010") and Rdst_crnt=Rdst_last 
+        (IR_crnt(15 DOWNTO 13)="110" or IR_crnt(15 DOWNTO 10)="100011" or IR_crnt(15 DOWNTO 11)="10010") and Rdst_crnt=Rdst_last 
     )
     else '0';
 
