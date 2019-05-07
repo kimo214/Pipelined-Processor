@@ -102,6 +102,9 @@ signal ALU_Forwarding1lastlast1, First_op1lastlast1, Second_op1lastlast1, ALU_Fo
 signal ALU_Forwarding2last1, First_op2last1, Second_op2last1,ALU_Forwarding2last2, First_op2last2, Second_op2last2 : STD_LOGIC;
 signal ALU_Forwarding2lastlast1, First_op2lastlast1, Second_op2lastlast1,ALU_Forwarding2lastlast2, First_op2lastlast2, Second_op2lastlast2 : STD_LOGIC;
 
+signal MemForward1last1,MemForward2last1,MemForward1last2,MemForward2last2 : STD_LOGIC;
+signal FstOpMem1last1,FstOpMem1last2,ScndOpMem1last1,ScndOpMem1last2 : STD_LOGIC;
+signal FstOpMem2last1,FstOpMem2last2,ScndOpMem2last1,ScndOpMem2last2 : STD_LOGIC;
 ---- For Channel 1 -> ALU 1
         
 signal	NOP1_Decode_out, Taken1_Decode_out, SET_Carry1_Decode_out, CLR_Carry1_Decode_out,
@@ -325,15 +328,21 @@ signal	Enable_SP2_MW_out, Enable_Reg2_MW_out, Mem_or_ALU2_MW_out			: STD_LOGIC;
 ---------------------------------------------------------------------------------------------------------------     
 ----------------------------------------  WriteBack to Register File  -------------------------------------------
 
-signal SP_WB_out                                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
+signal SP_WB_out                                         			: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
-signal Data1_WB_out, Data2_WB_out                                 : std_logic_vector(15 downto 0);
+signal Data1_WB_out, Data2_WB_out                                 	: std_logic_vector(15 downto 0);
 
-signal index1_WB_out, index2_WB_out                               : std_logic_vector(2 downto 0);
+signal index1_WB_out, index2_WB_out                               	: std_logic_vector(2 downto 0);
 
-signal Write1_WB_out, Write2_WB_out                               : std_logic;
+signal Write1_WB_out, Write2_WB_out                               	: std_logic;
 
-SIGNAL Enable_SP                                                  : STD_LOGIC := '0';
+SIGNAL Enable_SP                                                  	: STD_LOGIC := '0';
+
+
+
+signal PC_Stall_out 													: STD_LOGIC_VECTOR(31 DOWNTO 0);
+signal IR1_Stall_out, IR2_Stall_out                                 	: STD_LOGIC_VECTOR(15 downto 0);
+
 --------------------------------------------------------------------------------------------------------------
 ------------------------------------    E N D    O F    S I G N A L S   --------------------------------------
 --------------------------------------------------------------------------------------------------------------
@@ -344,7 +353,7 @@ Enable_SP <= Enable_SP1_MW_out or Enable_SP2_MW_out;
 PC_Register_IN <= "0000000000000000" & ALU1_Jump_DST when Taken1_Execute_out = '1'
                 else "0000000000000000" & ALU2_Jump_DST when Taken2_Execute_out = '1'
                 else Memory_Memory_out when RET1_memory_out = '1' or RET2_memory_out ='1'
-                else PC_Adder_OUT;
+                else PC_Stall_out;
 
 -------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------
@@ -565,14 +574,28 @@ PORT MAP(
 --===================== Decode Stage ==========================
 --=============================================================
 
+STALL_UNIT:
+ENTITY work.stall
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR1_CURR        => IR1_FD_out,
+        IR1_PREV        => IR1_DE_out,    
+        IR2_CURR        => IR2_FD_out,
+        IR2_PREV        => IR2_DE_out,
+        PC_IN           => PC_Register_OUT,         
+        IR1_OUT         => IR1_Stall_out,
+        IR2_OUT         => IR2_Stall_out,
+        PC_OUT          => PC_Stall_out
+);
+
 
 Decode_Stage:
 ENTITY work.Decode
 GENERIC MAP(n => 16, m => 10)
 PORT MAP(
             EXT_CLK                             => CLK,
-            IR1_IN                              => IR1_FD_out,
-            IR2_IN                              => IR2_FD_out,
+            IR1_IN                              => IR1_Stall_out,
+            IR2_IN                              => IR2_Stall_out,
             PC_IN             	                => PC_FD_out,
             SP_IN             			=> SP_FD_out,
             Flag_Register                       => Flags_FD_out,
@@ -842,16 +865,46 @@ PORT MAP(
         SecondOperand   => Second_op1lastlast2
 );
 
+MemFwd1Last1:
+ENTITY work.Mem_Forwd
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last             => IR1_MW_out,
+        IR_crnt             => IR1_DE_out,    
+        Rdst_last       => Rdst_Idx1_MW_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,
+        Mem_Forward  => MemForward1last1,
+        FirstOperand    => FstOpMem1last1,
+        SecondOperand   => ScndOpMem1last1
+);
+
+MemFwd1last2:
+ENTITY work.Mem_Forwd
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last             => IR2_MW_out,
+        IR_crnt             => IR1_DE_out,    
+        Rdst_last       => Rdst_Idx2_MW_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,         
+        Mem_Forward  => MemForward1last2,
+        FirstOperand    => FstOpMem1last2,
+        SecondOperand   => ScndOpMem1last2
+);
+
 ALU1_Operand1_E_in <= ALU1_Result_EM_out when (First_op1last1='1' and ALU_Forwarding1last1='1') 
 else ALU2_Result_EM_out when (First_op1last2='1' and ALU_Forwarding1last2='1')
 else ALU1_Result_MW_out when (First_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
 else ALU2_Result_MW_out when (First_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+else Memory_Result_MW_out when ((FstOpMem1last1='1' and MemForward1last1='1') or (FstOpMem1last2='1' and MemForward1last2='1'))
 else ALU1_Operand1_DE_out;
 
 ALU1_Operand2_E_in <= ALU1_Result_EM_out when (Second_op1last1='1' and ALU_Forwarding1last1='1') 
 else ALU2_Result_EM_out when (Second_op1last2='1' and ALU_Forwarding1last2='1')
 else ALU1_Result_MW_out when (Second_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
 else ALU2_Result_MW_out when (Second_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+else Memory_Result_MW_out when ((ScndOpMem1last1='1' and MemForward1last1='1') or (ScndOpMem1last2='1' and MemForward1last2='1'))
 else ALU1_Operand2_DE_out;
 
 
@@ -912,16 +965,47 @@ PORT MAP(
         SecondOperand   => Second_op2lastlast2
 );
 
+MemFwd2Last1:
+ENTITY work.Mem_Forwd
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last             => IR1_MW_out,
+        IR_crnt             => IR2_DE_out,    
+        Rdst_last       => Rdst_Idx1_MW_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,
+        Mem_Forward  => MemForward2last1,
+        FirstOperand    => FstOpMem2last1,
+        SecondOperand   => ScndOpMem2last1
+);
+
+MemFwd2last2:
+ENTITY work.Mem_Forwd
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last             => IR2_MW_out,
+        IR_crnt             => IR1_DE_out,    
+        Rdst_last       => Rdst_Idx2_MW_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,         
+        Mem_Forward  => MemForward2last2,
+        FirstOperand    => FstOpMem2last2,
+        SecondOperand   => ScndOpMem2last2
+);
+
+
 ALU2_Operand1_E_in <= ALU1_Result_EM_out when (First_op2last1='1' and ALU_Forwarding2last1='1') 
 else ALU2_Result_EM_out when (First_op2last2='1' and ALU_Forwarding2last2='1')
 else ALU1_Result_MW_out when (First_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
 else ALU2_Result_MW_out when (First_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
+else Memory_Result_MW_out when ((FstOpMem2last1='1' and MemForward2last1='1') or (FstOpMem2last2='1' and MemForward2last2='1'))
 else ALU2_Operand1_DE_out;
 
 ALU2_Operand2_E_in <= ALU1_Result_EM_out when (Second_op2last1='1' and ALU_Forwarding2last1='1')
 else ALU2_Result_EM_out when (Second_op2last2='1' and ALU_Forwarding2last2='1')
 else ALU1_Result_MW_out when (Second_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
 else ALU2_Result_MW_out when (Second_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
+else Memory_Result_MW_out when ((ScndOpMem2last1='1' and MemForward2last1='1') or (ScndOpMem2last2='1' and MemForward2last2='1'))
 else ALU2_Operand2_DE_out;
 
 

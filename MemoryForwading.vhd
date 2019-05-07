@@ -18,7 +18,7 @@ architecture arch_MEM_Forwarding OF MemoryForwarding IS
 
 begin
 MEM_Forwarding <= '1' when (IR1(15 DOWNTO 10) = "100100"
-    and ( --pop for previous channel 2
+    and (
         (IR2(15 DOWNTO 12) = "1000" and IR2(2 DOWNTO 0) = IR1(2 DOWNTO 0)) or --not,inc,dec,push
         (IR2(15 DOWNTO 13) = "110" and (IR2(5 DOWNTO 3) = IR1(2 DOWNTO 0) or IR2(2 DOWNTO 0) = IR1(2 DOWNTO 0))) or --add,sub,and,or
         (IR2(15 DOWNTO 10) = "001100" and (IR2(5 DOWNTO 3) = IR1(2 DOWNTO 0) or IR2(2 DOWNTO 0) = IR1(2 DOWNTO 0))) or --std
@@ -30,7 +30,7 @@ MEM_Forwarding <= '1' when (IR1(15 DOWNTO 10) = "100100"
         (IR2(15 DOWNTO 13) = "111" and IR2(2 DOWNTO 0) = IR1(2 DOWNTO 0)) --shl,shr
         )
     ) or (IR1(15 DOWNTO 10) = "001011"
-    and ( --ldd for previous channel 2
+    and (
         (IR2(15 DOWNTO 12) = "1000" and IR2(2 DOWNTO 0) = IR1(5 DOWNTO 3)) or --not,inc,dec,push
         (IR2(15 DOWNTO 13) = "110" and (IR2(5 DOWNTO 3) = IR1(5 DOWNTO 3) or IR2(2 DOWNTO 0) = IR1(5 DOWNTO 3))) or --add,sub,and,or
         (IR2(15 DOWNTO 10) = "001100" and (IR2(5 DOWNTO 3) = IR1(5 DOWNTO 3) or IR2(2 DOWNTO 0) = IR1(5 DOWNTO 3))) or --std

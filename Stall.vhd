@@ -211,7 +211,7 @@ PORT MAP(
         (IR2_CURR(15 DOWNTO 10) = "000010" and IR2_CURR(2 DOWNTO 0) = IR1_CURR(5 DOWNTO 3)) or --mov
         (IR2_CURR(15 DOWNTO 13) = "111" and IR2_CURR(2 DOWNTO 0) = IR1_CURR(5 DOWNTO 3)) --shl,shr
         )
-    )
+    ) or ALU_Stall = '1'
     else PC_IN when (IR1_PREV(15 DOWNTO 10) = "100100"                 -- Stall 1 time
     and ( --pop for previous channel 1
         (IR1_CURR(15 DOWNTO 12) = "1000" and IR1_CURR(2 DOWNTO 0) = IR1_PREV(2 DOWNTO 0)) or --not,inc,dec,push
@@ -260,7 +260,7 @@ PORT MAP(
         (IR1_CURR(15 DOWNTO 10) = "000010" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) or --mov
         (IR1_CURR(15 DOWNTO 13) = "111" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) --shl,shr
         )
-    ) or ALU_Stall = '1'
+    ) 
     else std_logic_vector(unsigned(PC_IN) + 2);         -- No Stall
 
 
