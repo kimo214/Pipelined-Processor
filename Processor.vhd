@@ -88,6 +88,8 @@ signal	Enable_SP2_FD_out, Enable_Reg2_FD_out, Mem_or_ALU2_FD_out			: STD_LOGIC;
 --------------------------------------------------------------------------------------------------------------     
 --------------------------------------------   Decode TO Buffer  ----------------------------------------------
 
+signal ALU_Forwarding1, First_op1, Second_op1, ALU_Forwarding2, First_op2, Second_op2 : STD_LOGIC;
+
 ---- For Channel 1 -> ALU 1
         
 signal	NOP1_Decode_out, Taken1_Decode_out, SET_Carry1_Decode_out, CLR_Carry1_Decode_out,
@@ -136,6 +138,12 @@ signal	Enable_SP2_Decode_out, Enable_Reg2_Decode_out,
 
 --------------------------------------------------------------------------------------------------------------     
 --------------------------------------------  ID\Ex Buffer  ----------------------------------------------
+
+
+signal	ALU1_Operand1_DE_in, ALU1_Operand2_DE_in : STD_LOGIC_VECTOR(31 downto 0);
+signal	ALU2_Operand1_DE_in, ALU2_Operand2_DE_in : STD_LOGIC_VECTOR(31 downto 0); 
+
+
 
 signal	IR1_DE_out, IR2_DE_out       		                                :  STD_LOGIC_VECTOR(15 DOWNTO 0);
 	    
@@ -602,8 +610,53 @@ PORT MAP(
 );
 
 
---========================================================================
---============================  DE Buffer ======================================
+--First DataForwarding Component
+DataForwarding1:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR1_DE_out,
+        IR_crnt         => IR1_FD_out,         
+        Rdst_last       => Rdst_Idx1_DE_out,
+        Rsrc_crnt       => Rsrc_Idx1_Decode_out,
+        Rdst_crnt       => Rdst_Idx1_Decode_out,
+        ALU_Forward     => ALU_Forwarding1,
+        FirstOperand    => First_op1,
+        SecondOperand   => Second_op1
+);
+
+ALU1_Operand1_DE_in <= ALU1_Execute_out when (First_op1='1' and ALU_Forwarding1='1')
+else ALU1_Operand1_Decode_out;
+
+ALU1_Operand2_DE_in <= ALU1_Execute_out when (Second_op1='1' and ALU_Forwarding1='1')
+else ALU1_Operand2_Decode_out;
+
+
+--Second DataForwarding Component
+DataForwarding2:
+ENTITY work.DataForwarding
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last         => IR2_DE_out,
+        IR_crnt         => IR2_FD_out,         
+        Rdst_last       => Rdst_Idx2_DE_out,
+        Rsrc_crnt       => Rsrc_Idx2_Decode_out,
+        Rdst_crnt       => Rdst_Idx2_Decode_out,
+        ALU_Forward     => ALU_Forwarding2,
+        FirstOperand    => First_op2,
+        SecondOperand   => Second_op2
+);
+
+ALU2_Operand1_DE_in <= ALU2_Execute_out when (First_op2='1' and ALU_Forwarding2='1')
+else ALU2_Operand1_Decode_out;
+
+ALU2_Operand2_DE_in <= ALU2_Execute_out when (Second_op2='1' and ALU_Forwarding2='1')
+else ALU2_Operand2_Decode_out;
+
+
+
+--===============================================================
+--============================  DE Buffer =======================
 --===============================================================
 
 ID_Exe_Buffer:
@@ -627,8 +680,8 @@ PORT MAP(
         SET_Carry1_IN    => SET_Carry1_Decode_out,
         CLR_Carry1_IN    => CLR_Carry1_Decode_out,
         ALU1_OP_Code_IN  => ALU1_OP_Code_Decode_out,
-        ALU1_Operand1_IN => ALU1_Operand1_Decode_out,
-        ALU1_Operand2_IN => ALU1_Operand2_Decode_out,
+        ALU1_Operand1_IN => ALU1_Operand1_DE_in,
+        ALU1_Operand2_IN => ALU1_Operand2_DE_in,
         Two_Operand_Instr1_Flag_IN => Two_Operand_Instr1_Flag_Decode_out,
         One_or_Two1_IN   => One_or_Two1_Decode_out,
         ALU1_Result_IN   => ALU1_Result_FD_out,
@@ -640,8 +693,8 @@ PORT MAP(
         SET_Carry2_IN    => SET_Carry2_Decode_out,
         CLR_Carry2_IN    => CLR_Carry2_Decode_out,
         ALU2_OP_Code_IN  => ALU2_OP_Code_Decode_out,
-        ALU2_Operand1_IN => ALU2_Operand1_Decode_out,
-        ALU2_Operand2_IN => ALU2_Operand2_Decode_out,
+        ALU2_Operand1_IN => ALU2_Operand1_DE_in,
+        ALU2_Operand2_IN => ALU2_Operand2_DE_in,
         Two_Operand_Instr2_Flag_IN => Two_Operand_Instr2_Flag_Decode_out,
         One_or_Two2_IN   => One_or_Two2_Decode_out,
         ALU2_Result_IN   => ALU2_Result_FD_out,
