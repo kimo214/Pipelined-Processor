@@ -181,7 +181,17 @@ PORT MAP(
         (IR2_CURR(15 DOWNTO 10) = "000010" and IR2_CURR(2 DOWNTO 0) = IR1_CURR(5 DOWNTO 3)) or --mov
         (IR2_CURR(15 DOWNTO 13) = "111" and IR2_CURR(2 DOWNTO 0) = IR1_CURR(5 DOWNTO 3)) --shl,shr
         )
-    ) or ALU_Stall = '1'
+    ) or ALU_Stall = '1'    --DATA HAZARD
+    or (IR1_CURR(15 DOWNTO 10) = "001000" and IR2_CURR(15 DOWNTO 10) = "001000")    --Two consictive IN.
+    or (IR1_CURR(15 DOWNTO 10) = "100011" and IR2_CURR(15 DOWNTO 10) = "100100")    --Strucural Hazard [PUSH -> POP]
+    or (IR1_CURR(15 DOWNTO 10) = "100100" and IR2_CURR(15 DOWNTO 10) = "100011")    --Strucural Hazard [POP -> PUSH]
+    or (IR1_CURR(15 DOWNTO 10) = "001011" and IR2_CURR(15 DOWNTO 10) = "001100")    --Strucural Hazard [LDD -> STD]
+    or (IR1_CURR(15 DOWNTO 10) = "001100" and IR2_CURR(15 DOWNTO 10) = "001011")    --Strucural Hazard [STD -> LDD]
+    -- Strucural Hazard:  PUSH or POP or LDD or STD  -> CALL or RET or RTI
+    or ( (IR1_CURR(15 DOWNTO 10) = "100011" or IR1_CURR(15 DOWNTO 10) = "100100" or IR1_CURR(15 DOWNTO 10) = "001100" or IR1_CURR(15 DOWNTO 10) = "001011") 
+    and (IR2_CURR(15 DOWNTO 10) = "100101" or IR2_CURR(15 DOWNTO 10) = "100110" or IR2_CURR(15 DOWNTO 10) = "100111") )
+
+    
     else IR2_CURR;
 
 
@@ -211,7 +221,16 @@ PORT MAP(
         (IR2_CURR(15 DOWNTO 10) = "000010" and IR2_CURR(2 DOWNTO 0) = IR1_CURR(5 DOWNTO 3)) or --mov
         (IR2_CURR(15 DOWNTO 13) = "111" and IR2_CURR(2 DOWNTO 0) = IR1_CURR(5 DOWNTO 3)) --shl,shr
         )
-    ) or ALU_Stall = '1'
+    ) or ALU_Stall = '1'        --Data Hazard.
+    or (IR1_CURR(15 DOWNTO 10) = "001000" and IR2_CURR(15 DOWNTO 10) = "001000")  --Two consictive IN.
+    or (IR1_CURR(15 DOWNTO 10) = "100011" and IR2_CURR(15 DOWNTO 10) = "100100")    --Strucural Hazard [PUSH -> POP]
+    or (IR1_CURR(15 DOWNTO 10) = "100100" and IR2_CURR(15 DOWNTO 10) = "100011")    --Strucural Hazard [POP -> PUSH]
+    or (IR1_CURR(15 DOWNTO 10) = "001011" and IR2_CURR(15 DOWNTO 10) = "001100")    --Strucural Hazard [LDD -> STD]
+    or (IR1_CURR(15 DOWNTO 10) = "001100" and IR2_CURR(15 DOWNTO 10) = "001011")    --Strucural Hazard [STD -> LDD]
+    -- Strucural Hazard:  PUSH or POP or LDD or STD  -> CALL or RET or RTI
+    or ( (IR1_CURR(15 DOWNTO 10) = "100011" or IR1_CURR(15 DOWNTO 10) = "100100" or IR1_CURR(15 DOWNTO 10) = "001100" or IR1_CURR(15 DOWNTO 10) = "001011") 
+    and (IR2_CURR(15 DOWNTO 10) = "100101" or IR2_CURR(15 DOWNTO 10) = "100110" or IR2_CURR(15 DOWNTO 10) = "100111") )
+
     else PC_IN when (IR1_PREV(15 DOWNTO 10) = "100100"                 -- Stall 1 time
     and ( --pop for previous channel 1
         (IR1_CURR(15 DOWNTO 12) = "1000" and IR1_CURR(2 DOWNTO 0) = IR1_PREV(2 DOWNTO 0)) or --not,inc,dec,push
