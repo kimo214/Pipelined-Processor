@@ -894,17 +894,17 @@ PORT MAP(
         SecondOperand   => ScndOpMem1last2
 );
 
-ALU1_Operand1_E_in <= ALU1_Result_EM_out when (First_op1last1='1' and ALU_Forwarding1last1='1') 
-else ALU2_Result_EM_out when (First_op1last2='1' and ALU_Forwarding1last2='1')
-else ALU1_Result_MW_out when (First_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
+ALU1_Operand1_E_in <= ALU2_Result_EM_out when (First_op1last2='1' and ALU_Forwarding1last2='1')
+else ALU1_Result_EM_out when (First_op1last1='1' and ALU_Forwarding1last1='1') 
 else ALU2_Result_MW_out when (First_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+else ALU1_Result_MW_out when (First_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
 else Memory_Result_MW_out when ((FstOpMem1last1='1' and MemForward1last1='1') or (FstOpMem1last2='1' and MemForward1last2='1'))
 else ALU1_Operand1_DE_out;
 
-ALU1_Operand2_E_in <= ALU1_Result_EM_out when (Second_op1last1='1' and ALU_Forwarding1last1='1') 
-else ALU2_Result_EM_out when (Second_op1last2='1' and ALU_Forwarding1last2='1')
-else ALU1_Result_MW_out when (Second_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
+ALU1_Operand2_E_in <= ALU2_Result_EM_out when (Second_op1last2='1' and ALU_Forwarding1last2='1')
+else ALU1_Result_EM_out when (Second_op1last1='1' and ALU_Forwarding1last1='1') 
 else ALU2_Result_MW_out when (Second_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+else ALU1_Result_MW_out when (Second_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
 else Memory_Result_MW_out when ((ScndOpMem1last1='1' and MemForward1last1='1') or (ScndOpMem1last2='1' and MemForward1last2='1'))
 else ALU1_Operand2_DE_out;
 
@@ -995,17 +995,17 @@ PORT MAP(
 );
 
 
-ALU2_Operand1_E_in <= ALU1_Result_EM_out when (First_op2last1='1' and ALU_Forwarding2last1='1') 
-else ALU2_Result_EM_out when (First_op2last2='1' and ALU_Forwarding2last2='1')
-else ALU1_Result_MW_out when (First_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
+ALU2_Operand1_E_in <= ALU2_Result_EM_out when (First_op2last2='1' and ALU_Forwarding2last2='1')
+else ALU1_Result_EM_out when (First_op2last1='1' and ALU_Forwarding2last1='1')
 else ALU2_Result_MW_out when (First_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
+else ALU1_Result_MW_out when (First_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
 else Memory_Result_MW_out when ((FstOpMem2last1='1' and MemForward2last1='1') or (FstOpMem2last2='1' and MemForward2last2='1'))
 else ALU2_Operand1_DE_out;
 
-ALU2_Operand2_E_in <= ALU1_Result_EM_out when (Second_op2last1='1' and ALU_Forwarding2last1='1')
-else ALU2_Result_EM_out when (Second_op2last2='1' and ALU_Forwarding2last2='1')
-else ALU1_Result_MW_out when (Second_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
+ALU2_Operand2_E_in <= ALU2_Result_EM_out when (Second_op2last2='1' and ALU_Forwarding2last2='1')
+else ALU1_Result_EM_out when (Second_op2last1='1' and ALU_Forwarding2last1='1')
 else ALU2_Result_MW_out when (Second_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
+else ALU1_Result_MW_out when (Second_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
 else Memory_Result_MW_out when ((ScndOpMem2last1='1' and MemForward2last1='1') or (ScndOpMem2last2='1' and MemForward2last2='1'))
 else ALU2_Operand2_DE_out;
 
