@@ -24,15 +24,16 @@ SIGNAL Carry			: STD_LOGIC;
 SIGNAL Adder_Subtractor_OUT	: STD_LOGIC_VECTOR(n-1 DOWNTO 0);
 SIGNAL En			: STD_LOGIC;
 
-SIGNAL Left_Part_SHL		: INTEGER range 0 to 20; -- Maximum shift bits = 4
-SIGNAL Right_Part_SHR		: INTEGER range 0 to 20;
+SIGNAL Left_Part_SHL		: INTEGER range 0 to 50; -- Maximum shift bits = 4
+SIGNAL Right_Part_SHR		: INTEGER range 0 to 50;
 
 BEGIN
 
 En  <= '0' WHEN Operation = "111"	                -- ALU Enable
 	ELSE '1';
 
-Op2_Int <= TO_INTEGER(UNSIGNED(Operand2));  		-- Operand2 as Integer
+Op2_Int <= TO_INTEGER(UNSIGNED(Operand2)) when TO_INTEGER(UNSIGNED(Operand2)) < 16 		-- Operand2 as Integer
+	else 16;
 
 Left_Part_SHL <= TO_INTEGER(UNSIGNED(Operand1(16 - 1 DOWNTO 16 - Op2_Int))) when Operation = "101"   -- 16 since shift is done on 16 bit registers
 				else 0;
