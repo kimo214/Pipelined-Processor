@@ -57,7 +57,7 @@ for L in lines:
     L = L.replace(',',' ')
     L = L.replace(';',' ')
     L = L.replace('\n','')
-    Words = L.split(' ')
+    Words = L.split()
     Instruction = Words[0].upper()
     
     if(not OpCode.__contains__(Instruction)):
