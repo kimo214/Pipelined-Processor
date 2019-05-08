@@ -208,20 +208,10 @@ Taken2_OUT <= '1' when (IR2_IN(15 DOWNTO 11) = "01011")   				-- JMP Instruction
 		else '0';
 
 -------------------------------------------------------------------------------------------------------------------
-OUT_PORT_LOGIC:
-PROCESS(dummy_CLK)
-BEGIN
-	IF(FALLING_EDGE(dummy_CLK)) THEN															--- Make sure that Ch1 wont jump
-		IF(IR2_IN(15 DOWNTO 10) = "001001" and IR1_IN(15 DOWNTO 10) /= "001001" and Taken1_OUT = '0') THEN
-			OUT_PORT <= ALU2_Operand1(15 DOWNTO 0);												--- Ch2 out while ch1 isn't out
-		ELSIF(IR1_IN(15 DOWNTO 10) = "001001" and IR2_IN(15 DOWNTO 10) /= "001001")	THEN		--- Ch1 out while ch2 isnt out
-			OUT_PORT <= ALU1_Operand1(15 DOWNTO 0);
-		ELSE 
-			OUT_PORT <= INPUT_PORT;
-		END IF;
-	END IF;
-END PROCESS;
 
+OUT_PORT <= ALU2_Operand1(15 DOWNTO 0) when IR2_IN(15 DOWNTO 10) = "001001" and Taken1_OUT = '0'
+			else ALU1_Operand1(15 DOWNTO 0) when IR1_IN(15 DOWNTO 10) = "001001" and IR2_IN(15 DOWNTO 10) /= "001001" 
+			ELSE INPUT_PORT;
 ----------------------------------------------------------------------------------------------------------------------
 Flags_OUT <= new_Flags;
 ALU1_OUT <= ALU1_Result;
