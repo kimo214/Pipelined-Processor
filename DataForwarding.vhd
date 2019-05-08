@@ -21,7 +21,7 @@ BEGIN
             or IR_crnt(15 DOWNTO 10)="001011" or IR_crnt(15 DOWNTO 10)="001100") and Rsrc_crnt=Rdst_last)
         
         or ((   (IR_crnt(15 DOWNTO 12)="1000" and IR_crnt(11 DOWNTO 10)/="11") 
-                or IR_crnt(15 DOWNTO 13)="010" ) and Rdst_crnt=Rdst_last) 
+                or IR_crnt(15 DOWNTO 13)="010" or IR_crnt(15 DOWNTO 10) = "001001" ) and Rdst_crnt=Rdst_last) 
     )
     else '0';
 
