@@ -34,8 +34,10 @@ En  <= '0' WHEN Operation = "111"	                -- ALU Enable
 
 Op2_Int <= TO_INTEGER(UNSIGNED(Operand2));  		-- Operand2 as Integer
 
-Left_Part_SHL <= TO_INTEGER(UNSIGNED(Operand1(16 - 1 DOWNTO 16 - Op2_Int)));   -- 16 since shift is done on 16 bit registers
-Right_Part_SHR <= TO_INTEGER(UNSIGNED(Operand1(Op2_Int - 1 DOWNTO 0)));
+Left_Part_SHL <= TO_INTEGER(UNSIGNED(Operand1(16 - 1 DOWNTO 16 - Op2_Int))) when Operation = "101"   -- 16 since shift is done on 16 bit registers
+				else 0;
+Right_Part_SHR <= TO_INTEGER(UNSIGNED(Operand1(Op2_Int - 1 DOWNTO 0))) when Operation = "001"
+				else 0;
 
 Adder_subtractor_Op <= '1' WHEN  Operation = "110"      -- Adder_Subtractor Operation (Add or sub)
 		       ELSE '0';

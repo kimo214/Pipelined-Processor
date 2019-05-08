@@ -596,6 +596,7 @@ PORT MAP(
             EXT_CLK                             => CLK,
             IR1_IN                              => IR1_Stall_out,
             IR2_IN                              => IR2_Stall_out,
+            IN_PORT                             => pport,
             PC_IN             	                => PC_FD_out,
             SP_IN             			=> SP_FD_out,
             Flag_Register                       => Flags_FD_out,

@@ -21,8 +21,8 @@ architecture WB_a of WB is
 
 begin
 
-Data1 <= InPort when IR1_IN(15 DOWNTO 10) = "001000" else ALU1(15 downto 0) when S1 = '0' else MEM(31 downto 16);
-Data2 <= InPort when IR2_IN(15 DOWNTO 10) = "001000" else ALU2(15 downto 0) when S2 = '0' else MEM(31 downto 16);
+Data1 <= ALU1(15 downto 0) when S1 = '0' else MEM(31 downto 16);
+Data2 <= ALU2(15 downto 0) when S2 = '0' else MEM(31 downto 16);
 
 SPout <= SP when en1SP = '0' and en2SP = '0' 
 else ALU1 when en1SP = '1' and en2SP = '0'

@@ -7,7 +7,8 @@ ENTITY Decode IS
     PORT(
 
 -------------------------------------  Input Bits  ----------------------------------------
-            EXT_CLK	                                : IN  STD_LOGIC;                                                                          
+            EXT_CLK	                                : IN  STD_LOGIC;                       
+            IN_PORT                                 : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);                                             
             IR1_IN         		                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             IR2_IN         			            : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
             PC_IN             			        : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -123,6 +124,7 @@ BEGIN
     ALU1_Operand1_OUT <= PC_IN when IR1_IN(15 DOWNTO 10)="001010"
         else SP_IN when IR1_IN(15 DOWNTO 12)="1001" or IR1_IN(15 DOWNTO 10)="100011"
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(5 DOWNTO 3)))) when IR1_IN(15 DOWNTO 10) = "001001"
+        else "0000000000000000" & IN_PORT when IR1_IN(15 DOWNTO 10) = "001000"
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR1_IN(2 DOWNTO 0)))); 
 
     ALU1_Operand2_OUT <= "0000000000000000000000000" & IR1_IN(9 DOWNTO 3) when IR1_IN(15 DOWNTO 10)="111101" or IR1_IN(15 DOWNTO 10)="111001"
@@ -204,6 +206,7 @@ BEGIN
     ALU2_Operand1_OUT <= PC_IN when IR2_IN(15 DOWNTO 10)="001010"
         else SP_IN when IR2_IN(15 DOWNTO 12)="1001" or IR2_IN(15 DOWNTO 10)="100011"
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(5 DOWNTO 3)))) when IR2_IN(15 DOWNTO 10) = "001001"
+        else "0000000000000000" & IN_PORT when IR2_IN(15 DOWNTO 10) = "001000"
         else "0000000000000000" & registerfile(to_integer(Unsigned(IR2_IN(2 DOWNTO 0)))); 
 
     ALU2_Operand2_OUT <= "0000000000000000000000000" & IR2_IN(9 DOWNTO 3) when IR2_IN(15 DOWNTO 10)="111101" or IR2_IN(15 DOWNTO 10)="111001"
