@@ -104,11 +104,7 @@ PORT MAP(
         (IR1_CURR(15 DOWNTO 10) = "000010" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) or --mov
         (IR1_CURR(15 DOWNTO 13) = "111" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) --shl,shr
         )
-<<<<<<< HEAD
     ) or ( IR1_CURR(15 DOWNTO 10) = "100011" and ( IR1_PREV(15 DOWNTO 10) = "100011" or IR2_PREV(15 DOWNTO 10) = "100011"  ) ) ) 
-=======
-    ) )
->>>>>>> c8b0e41e45bf23b105f5b76965e58871a90eb4f6
     else IR1_CURR;
 
 
@@ -200,11 +196,7 @@ PORT MAP(
     -- Strucural Hazard:  PUSH or POP or LDD or STD  -> CALL or RET or RTI
     or ( (IR1_CURR(15 DOWNTO 10) = "100011" or IR1_CURR(15 DOWNTO 10) = "100100" or IR1_CURR(15 DOWNTO 10) = "001100" or IR1_CURR(15 DOWNTO 10) = "001011") 
     and (IR2_CURR(15 DOWNTO 10) = "100101" or IR2_CURR(15 DOWNTO 10) = "100110" or IR2_CURR(15 DOWNTO 10) = "100111") )
-<<<<<<< HEAD
     or ( IR1_CURR(15 DOWNTO 10) = "100011" and ( IR1_PREV(15 DOWNTO 10) = "100011" or IR2_PREV(15 DOWNTO 10) = "100011"  ) ) ) 
-=======
-    )
->>>>>>> c8b0e41e45bf23b105f5b76965e58871a90eb4f6
     
     else IR2_CURR;
 
@@ -250,12 +242,9 @@ PORT MAP(
     -- Strucural Hazard:  PUSH or POP or LDD or STD  -> CALL or RET or RTI
     or ( (IR1_CURR(15 DOWNTO 10) = "100011" or IR1_CURR(15 DOWNTO 10) = "100100" or IR1_CURR(15 DOWNTO 10) = "001100" or IR1_CURR(15 DOWNTO 10) = "001011") 
     and (IR2_CURR(15 DOWNTO 10) = "100101" or IR2_CURR(15 DOWNTO 10) = "100110" or IR2_CURR(15 DOWNTO 10) = "100111") )
-<<<<<<< HEAD
     or ( IR2_CURR(15 DOWNTO 10) = "100011" and ( IR1_PREV(15 DOWNTO 10) = "100011" or IR2_PREV(15 DOWNTO 10) = "100011"  ) )
     ) 
-=======
     )
->>>>>>> c8b0e41e45bf23b105f5b76965e58871a90eb4f6
 
     else PC_IN when IR2_PREV(15 DOWNTO 10) /= "001010" and ( (IR1_PREV(15 DOWNTO 10) = "100100"                 -- Stall 1 time
     and ( --pop for previous channel 1
@@ -305,11 +294,7 @@ PORT MAP(
         (IR1_CURR(15 DOWNTO 10) = "000010" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) or --mov
         (IR1_CURR(15 DOWNTO 13) = "111" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) --shl,shr
         )
-<<<<<<< HEAD
     ) or ( IR1_CURR(15 DOWNTO 10) = "100011" and ( IR1_PREV(15 DOWNTO 10) = "100011" or IR2_PREV(15 DOWNTO 10) = "100011"  ) ) ) 
-=======
-    ) )
->>>>>>> c8b0e41e45bf23b105f5b76965e58871a90eb4f6
     else std_logic_vector(unsigned(PC_IN) + 2);         -- No Stall
 
 
