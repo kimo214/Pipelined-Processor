@@ -73,7 +73,10 @@ for L in lines:
         Val = str("{0:b}".format(int(Words[0])))
         Val = Val.rjust(16,'0')
         Out.write(str(i)+': ' +Val+'\n')
+<<<<<<< HEAD
         i+=1
+=======
+>>>>>>> c8b0e41e45bf23b105f5b76965e58871a90eb4f6
         continue
     except:
         pass
