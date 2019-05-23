@@ -10,6 +10,7 @@ ENTITY Execution IS
     IR1_IN         		                : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
     IR2_IN         			            : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 
+	SP					  : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 	IR1_IN_NXT							: IN  STD_LOGIC_VECTOR(15 DOWNTO 0);		-- IR1 of the next packet
 	INPUT_PORT							: IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
 -----------------------------------------------------------------------------------	
@@ -117,9 +118,11 @@ PORT MAP(
 );
 
 	ALU1_Operand1 <= ZERO_VECTOR(15 DOWNTO 0) & IR2_IN when IR1_IN(15 DOWNTO 10) = "001010"
-					else Operand1_ALU1;
+				else SP when SP_As_Address1 = '1' or ALU_As_Address1 = '1'
+				else Operand1_ALU1;
 	ALU2_Operand1 <= ZERO_VECTOR(15 DOWNTO 0) & IR1_IN_NXT when IR2_IN(15 DOWNTO 10) = "001010"
-					else Operand1_ALU2;
+				else SP when SP_As_Address2 = '1' or ALU_As_Address2 = '1'
+				else Operand1_ALU2;
 
 	ALU1_Operand2 <= Operand2_ALU1 when Two_Operand_Flag1 = '1' 
 		else ZERO_VECTOR(31 DOWNTO 2) & "10" when One_Or_Two_Flag1 = '1'

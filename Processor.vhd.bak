@@ -5,7 +5,7 @@ USE IEEE.math_real.all;
 
 ENTITY Processor is
     port( CLK, Register_RST, Buffer_RST, Interrupt: IN  STD_LOGIC;
-          pport : INOUT STD_LOGIC_Vector(15 Downto 0)
+          pport : INOUT STD_LOGIC_Vector(15 Downto 0) := (others => '0')
     );
 END ENTITY;
 
@@ -30,6 +30,17 @@ SIGNAL Register4_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register5_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register6_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
 SIGNAL Register7_OUTPUT     : STD_LOGIC_VECTOR(15 DOWNTO 0) := (others => '0');
+
+SIGNAL RST_FD_Buffer1        : STD_LOGIC := '0';
+SIGNAL RST_FD_Buffer2        : STD_LOGIC := '0';
+SIGNAL RST_DE_Buffer1        : STD_LOGIC := '0';
+SIGNAL RST_DE_Buffer2        : STD_LOGIC := '0';
+SIGNAL RST_EM_Buffer1        : STD_LOGIC := '0';
+SIGNAL RST_EM_Buffer2        : STD_LOGIC := '0';
+SIGNAL RST_MW_Buffer1        : STD_LOGIC := '0';
+SIGNAL RST_MW_Buffer2        : STD_LOGIC := '0';
+
+
 --------------------------------------------  FETCH TO BUFFER  ----------------------------------------------
 
 signal IR1_Fetch_out, IR2_Fetch_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -93,6 +104,9 @@ signal ALU_Forwarding1lastlast1, First_op1lastlast1, Second_op1lastlast1, ALU_Fo
 signal ALU_Forwarding2last1, First_op2last1, Second_op2last1,ALU_Forwarding2last2, First_op2last2, Second_op2last2 : STD_LOGIC;
 signal ALU_Forwarding2lastlast1, First_op2lastlast1, Second_op2lastlast1,ALU_Forwarding2lastlast2, First_op2lastlast2, Second_op2lastlast2 : STD_LOGIC;
 
+signal MemForward1last1,MemForward2last1,MemForward1last2,MemForward2last2 : STD_LOGIC;
+signal FstOpMem1last1,FstOpMem1last2,ScndOpMem1last1,ScndOpMem1last2 : STD_LOGIC;
+signal FstOpMem2last1,FstOpMem2last2,ScndOpMem2last1,ScndOpMem2last2 : STD_LOGIC;
 ---- For Channel 1 -> ALU 1
         
 signal	NOP1_Decode_out, Taken1_Decode_out, SET_Carry1_Decode_out, CLR_Carry1_Decode_out,
@@ -201,6 +215,7 @@ signal	Enable_SP2_DE_out, Enable_Reg2_DE_out, Mem_or_ALU2_DE_out			: STD_LOGIC;
 
 signal ALU1_Execute_out, ALU2_Execute_out                                   : STD_LOGIC_VECTOR(31 DOWNTO 0);
 signal Taken1_Execute_out, Taken2_Execute_out                               : STD_LOGIC;
+signal ALU1_Jump_DST, ALU2_Jump_DST                                         : STD_LOGIC_VECTOR(15 DOWNTO 0);
 signal Flags_Execute_out		                                            : STD_LOGIC_VECTOR(2 DOWNTO 0) := (others =>'0');
 
 --------------------------------------------------------------------------------------------------------------     
@@ -257,6 +272,7 @@ signal	Enable_SP2_EM_out, Enable_Reg2_EM_out, Mem_or_ALU2_EM_out			: STD_LOGIC;
 ---------------------------------------------------------------------------------------------------------------     
 --------------------------------------------  Memory to Buffer  ----------------------------------------------
 
+signal RET1_memory_out, RET2_memory_out                                     : STD_LOGIC;
 signal Memory_Memory_out                                                    : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 
@@ -314,15 +330,21 @@ signal	Enable_SP2_MW_out, Enable_Reg2_MW_out, Mem_or_ALU2_MW_out			: STD_LOGIC;
 ---------------------------------------------------------------------------------------------------------------     
 ----------------------------------------  WriteBack to Register File  -------------------------------------------
 
-signal SP_WB_out                                                       : STD_LOGIC_VECTOR(31 DOWNTO 0);
+signal SP_WB_out                                         			: STD_LOGIC_VECTOR(31 DOWNTO 0);
 
-signal Data1_WB_out, Data2_WB_out                                 : std_logic_vector(15 downto 0);
+signal Data1_WB_out, Data2_WB_out                                 	: std_logic_vector(15 downto 0);
 
-signal index1_WB_out, index2_WB_out                               : std_logic_vector(2 downto 0);
+signal index1_WB_out, index2_WB_out                               	: std_logic_vector(2 downto 0);
 
-signal Write1_WB_out, Write2_WB_out                               : std_logic;
+signal Write1_WB_out, Write2_WB_out                               	: std_logic;
 
-SIGNAL Enable_SP                                                  : STD_LOGIC := '0';
+SIGNAL Enable_SP                                                  	: STD_LOGIC := '0';
+
+
+
+signal PC_Stall_out 													: STD_LOGIC_VECTOR(31 DOWNTO 0);
+signal IR1_Stall_out, IR2_Stall_out                                 	: STD_LOGIC_VECTOR(15 downto 0);
+
 --------------------------------------------------------------------------------------------------------------
 ------------------------------------    E N D    O F    S I G N A L S   --------------------------------------
 --------------------------------------------------------------------------------------------------------------
@@ -330,10 +352,30 @@ SIGNAL Enable_SP                                                  : STD_LOGIC :=
 BEGIN
 
 Enable_SP <= Enable_SP1_MW_out or Enable_SP2_MW_out;
-PC_Register_IN <= ALU1_Execute_out when Taken1_Execute_out = '1'
-                else ALU2_Execute_out when Taken2_Execute_out = '1'
-                else PC_Adder_OUT;
---==========================================================
+PC_Register_IN <= "0000000000000000" & ALU1_Jump_DST when Taken1_Execute_out = '1'
+                else "0000000000000000" & ALU2_Jump_DST when Taken2_Execute_out = '1'
+                else Memory_Memory_out when RET1_memory_out = '1' or RET2_memory_out ='1'
+                else PC_Stall_out;
+
+-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
+-- Jumps Flush Logic
+RST_DE_Buffer1 <= '1' when Taken1_Execute_out = '1' or Taken2_Execute_out = '1'
+                or RET1_memory_out ='1' or RET2_memory_out = '1'
+                else '0';
+RST_DE_Buffer2 <= '1' when Taken1_Execute_out = '1' or Taken2_Execute_out = '1'
+                or RET1_memory_out ='1' or RET2_memory_out = '1'
+                else '0';
+
+RST_EM_Buffer1 <= '1' when RET1_memory_out ='1' or RET2_memory_out = '1'
+                else '0';
+RST_EM_Buffer2 <= '1' when Taken1_Execute_out = '1'
+                or RET1_memory_out ='1' or RET2_memory_out = '1'
+                else '0';
+
+RST_MW_Buffer2 <= '1' when RET1_memory_out = '1'
+                else '0';
+--===========================================================================
 PC_Adder:-- For incrementing PC .. PC + 2 
 ENTITY work.my_nadder
 GENERIC MAP(n => 32)
@@ -395,7 +437,8 @@ PORT MAP(
 
         PC_IN             => PC_Register_OUT,
         IR1               => IR1_Fetch_out,
-        IR2               => IR2_Fetch_out
+        IR2               => IR2_Fetch_out,
+        memzero           => memoryzero
 );
 
 --=============================================================
@@ -403,8 +446,9 @@ IF_ID_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => Buffer_RST,
-	
+        EXT_RST1  => RST_FD_Buffer1,
+	EXT_RST2  => RST_FD_Buffer2,
+
 	Stall     => '0',
         Flush     => '0',
 -------------------------------------------------------
@@ -533,14 +577,29 @@ PORT MAP(
 --===================== Decode Stage ==========================
 --=============================================================
 
+STALL_UNIT:
+ENTITY work.stall
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR1_CURR        => IR1_FD_out,
+        IR1_PREV        => IR1_DE_out,    
+        IR2_CURR        => IR2_FD_out,
+        IR2_PREV        => IR2_DE_out,
+        PC_IN           => PC_Register_OUT,         
+        IR1_OUT         => IR1_Stall_out,
+        IR2_OUT         => IR2_Stall_out,
+        PC_OUT          => PC_Stall_out
+);
+
 
 Decode_Stage:
 ENTITY work.Decode
 GENERIC MAP(n => 16, m => 10)
 PORT MAP(
             EXT_CLK                             => CLK,
-            IR1_IN                              => IR1_FD_out,
-            IR2_IN                              => IR2_FD_out,
+            IR1_IN                              => IR1_Stall_out,
+            IR2_IN                              => IR2_Stall_out,
+            IN_PORT                             => pport,
             PC_IN             	                => PC_FD_out,
             SP_IN             			=> SP_FD_out,
             Flag_Register                       => Flags_FD_out,
@@ -623,8 +682,9 @@ ID_Exe_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => Buffer_RST,
-	
+        EXT_RST1  => RST_DE_Buffer1,
+	EXT_RST2  => RST_DE_Buffer2,
+
 	Stall     => '0',
         Flush     => '0',
 -------------------------------------------------------
@@ -786,10 +846,10 @@ ENTITY work.DataForwarding
 GENERIC MAP(n => 16, m => 10)
 PORT MAP(
         IR_last         => IR1_MW_out,
-        IR_crnt         => IR1_EM_out,         
+        IR_crnt         => IR1_DE_out,         
         Rdst_last       => Rdst_Idx1_MW_out,
-        Rsrc_crnt       => Rsrc_Idx1_EM_out,
-        Rdst_crnt       => Rdst_Idx1_EM_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,
         ALU_Forward     => ALU_Forwarding1lastlast1,
         FirstOperand    => First_op1lastlast1,
         SecondOperand   => Second_op1lastlast1
@@ -800,25 +860,55 @@ ENTITY work.DataForwarding
 GENERIC MAP(n => 16, m => 10)
 PORT MAP(
         IR_last         => IR2_MW_out,
-        IR_crnt         => IR1_EM_out,         
+        IR_crnt         => IR1_DE_out,         
         Rdst_last       => Rdst_Idx2_MW_out,
-        Rsrc_crnt       => Rsrc_Idx1_EM_out,
-        Rdst_crnt       => Rdst_Idx1_EM_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,
         ALU_Forward     => ALU_Forwarding1lastlast2,
         FirstOperand    => First_op1lastlast2,
         SecondOperand   => Second_op1lastlast2
 );
 
-ALU1_Operand1_E_in <= ALU1_Result_EM_out when (First_op1last1='1' and ALU_Forwarding1last1='1') 
-else ALU2_Result_EM_out when (First_op1last2='1' and ALU_Forwarding1last2='1')
-else ALU1_Result_MW_out when (First_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
+MemFwd1Last1:
+ENTITY work.Mem_Forwd
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last             => IR1_MW_out,
+        IR_crnt             => IR1_DE_out,    
+        Rdst_last       => Rdst_Idx1_MW_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,
+        Mem_Forward  => MemForward1last1,
+        FirstOperand    => FstOpMem1last1,
+        SecondOperand   => ScndOpMem1last1
+);
+
+MemFwd1last2:
+ENTITY work.Mem_Forwd
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last             => IR2_MW_out,
+        IR_crnt             => IR1_DE_out,    
+        Rdst_last       => Rdst_Idx2_MW_out,
+        Rsrc_crnt       => Rsrc_Idx1_DE_out,
+        Rdst_crnt       => Rdst_Idx1_DE_out,         
+        Mem_Forward  => MemForward1last2,
+        FirstOperand    => FstOpMem1last2,
+        SecondOperand   => ScndOpMem1last2
+);
+
+ALU1_Operand1_E_in <= ALU2_Result_EM_out when (First_op1last2='1' and ALU_Forwarding1last2='1')
+else ALU1_Result_EM_out when (First_op1last1='1' and ALU_Forwarding1last1='1') 
 else ALU2_Result_MW_out when (First_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+else ALU1_Result_MW_out when (First_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
+else Memory_Result_MW_out when ((FstOpMem1last1='1' and MemForward1last1='1') or (FstOpMem1last2='1' and MemForward1last2='1'))
 else ALU1_Operand1_DE_out;
 
-ALU1_Operand2_E_in <= ALU1_Result_EM_out when (Second_op1last1='1' and ALU_Forwarding1last1='1') 
-else ALU2_Result_EM_out <= (Second_op1last2='1' and ALU_Forwarding1last2='1')
-else ALU1_Result_MW_out <= (Second_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
-else ALU2_Result_MW_out <= (Second_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+ALU1_Operand2_E_in <= ALU2_Result_EM_out when (Second_op1last2='1' and ALU_Forwarding1last2='1')
+else ALU1_Result_EM_out when (Second_op1last1='1' and ALU_Forwarding1last1='1') 
+else ALU2_Result_MW_out when (Second_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
+else ALU1_Result_MW_out when (Second_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
+else Memory_Result_MW_out when ((ScndOpMem1last1='1' and MemForward1last1='1') or (ScndOpMem1last2='1' and MemForward1last2='1'))
 else ALU1_Operand2_DE_out;
 
 
@@ -856,10 +946,10 @@ ENTITY work.DataForwarding
 GENERIC MAP(n => 16, m => 10)
 PORT MAP(
         IR_last         => IR1_MW_out,
-        IR_crnt         => IR2_EM_out,         
+        IR_crnt         => IR2_DE_out,         
         Rdst_last       => Rdst_Idx1_MW_out,
-        Rsrc_crnt       => Rsrc_Idx2_EM_out,
-        Rdst_crnt       => Rdst_Idx2_EM_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,
         ALU_Forward     => ALU_Forwarding2lastlast1,
         FirstOperand    => First_op2lastlast1,
         SecondOperand   => Second_op2lastlast1
@@ -870,25 +960,56 @@ ENTITY work.DataForwarding
 GENERIC MAP(n => 16, m => 10)
 PORT MAP(
         IR_last         => IR2_MW_out,
-        IR_crnt         => IR2_EM_out,         
+        IR_crnt         => IR2_DE_out,         
         Rdst_last       => Rdst_Idx2_MW_out,
-        Rsrc_crnt       => Rsrc_Idx2_EM_out,
-        Rdst_crnt       => Rdst_Idx2_EM_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,
         ALU_Forward     => ALU_Forwarding2lastlast2,
         FirstOperand    => First_op2lastlast2,
         SecondOperand   => Second_op2lastlast2
 );
 
-ALU2_Operand1_E_in <= ALU1_Result_EM_out when (First_op2last1='1' and ALU_Forwarding2last1='1') 
-else ALU2_Result_EM_out when (First_op2last2='1' and ALU_Forwarding2last2='1')
-else ALU1_Result_MW_out when (First_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
+MemFwd2Last1:
+ENTITY work.Mem_Forwd
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last             => IR1_MW_out,
+        IR_crnt             => IR2_DE_out,    
+        Rdst_last       => Rdst_Idx1_MW_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,
+        Mem_Forward  => MemForward2last1,
+        FirstOperand    => FstOpMem2last1,
+        SecondOperand   => ScndOpMem2last1
+);
+
+MemFwd2last2:
+ENTITY work.Mem_Forwd
+GENERIC MAP(n => 16, m => 10)
+PORT MAP(
+        IR_last             => IR2_MW_out,
+        IR_crnt             => IR1_DE_out,    
+        Rdst_last       => Rdst_Idx2_MW_out,
+        Rsrc_crnt       => Rsrc_Idx2_DE_out,
+        Rdst_crnt       => Rdst_Idx2_DE_out,         
+        Mem_Forward  => MemForward2last2,
+        FirstOperand    => FstOpMem2last2,
+        SecondOperand   => ScndOpMem2last2
+);
+
+
+ALU2_Operand1_E_in <= ALU2_Result_EM_out when (First_op2last2='1' and ALU_Forwarding2last2='1')
+else ALU1_Result_EM_out when (First_op2last1='1' and ALU_Forwarding2last1='1')
 else ALU2_Result_MW_out when (First_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
+else ALU1_Result_MW_out when (First_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
+else Memory_Result_MW_out when ((FstOpMem2last1='1' and MemForward2last1='1') or (FstOpMem2last2='1' and MemForward2last2='1'))
 else ALU2_Operand1_DE_out;
 
-ALU2_Operand2_E_in <= ALU1_Result_EM_out when (Second_op2last1='1' and ALU_Forwarding2last1='1')
-else ALU2_Result_EM_out when (Second_op2last2='1' and ALU_Forwarding2last2='1')
-else ALU1_Result_MW_out when (Second_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
+ALU2_Operand2_E_in <= ALU2_Result_EM_out when (Second_op2last2='1' and ALU_Forwarding2last2='1')
+else ALU1_Result_EM_out when (Second_op2last1='1' and ALU_Forwarding2last1='1')
 else ALU2_Result_MW_out when (Second_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
+else ALU1_Result_MW_out when (Second_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
+else Memory_Result_MW_out when ((ScndOpMem2last1='1' and MemForward2last1='1') or (ScndOpMem2last2='1' and MemForward2last2='1'))
 else ALU2_Operand2_DE_out;
 
 
@@ -903,6 +1024,9 @@ PORT MAP(
 
         IR1_IN              => IR1_DE_out,
         IR2_IN              => IR2_DE_out,
+        SP                  => SP_Register_OUT,
+        IR1_IN_NXT          => IR1_FD_out,                       -- IR1 of the next packet
+        INPUT_PORT          => pport,
 ---------------------------------------------------------------
         Flag_Reg            => Flag_Register_OUT,
         dummy_CLK	    => CLK,
@@ -919,6 +1043,7 @@ PORT MAP(
         Two_Operand_Flag1   => Two_Operand_Instr1_Flag_DE_out,
         One_Or_Two_Flag1    => One_or_Two1_DE_out,
 
+        ALU1_JMP_DST        => ALU1_Jump_DST,
         Taken1_OUT          => Taken1_Execute_out,
         ALU1_OUT            => ALU1_Execute_out,
 ----------------------------------------------------------------
@@ -935,8 +1060,11 @@ PORT MAP(
         Two_Operand_Flag2   => Two_Operand_Instr2_Flag_DE_out,
         One_Or_Two_Flag2    => One_or_Two2_DE_out,
 
+        ALU2_JMP_DST        => ALU2_Jump_DST,
         Taken2_OUT          => Taken2_Execute_out,
         ALU2_OUT            => ALU2_Execute_out,
+
+        OUT_PORT            => pport,
         Flags_OUT           => Flags_Execute_out
 );
 
@@ -948,15 +1076,16 @@ Exe_Mem_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => Buffer_RST,
-	
+        EXT_RST1  => RST_EM_Buffer1,
+	EXT_RST2  => RST_EM_Buffer2,
+
 	Stall     => '0',
         Flush     => '0',
 ---------------------------------------------------------
         IR1_IN             => IR1_DE_out,           -- OLD Registers ***********
         IR2_IN             => IR2_DE_out,
         PC_IN              => PC_DE_out,
-        SP_IN              => SP_DE_out,
+        SP_IN              => SP_Register_OUT,
         Flags_IN           => Flag_Register_OUT,
 ---------------------------------------------------------        
         NOP1_IN            => NOP1_DE_out,
@@ -964,8 +1093,8 @@ PORT MAP(
         SET_Carry1_IN      => SET_Carry1_DE_out,
         CLR_Carry1_IN      => CLR_Carry1_DE_out,
         ALU1_OP_Code_IN    => ALU1_OP_Code_DE_out,
-        ALU1_Operand1_IN   => ALU1_Operand1_DE_out,
-        ALU1_Operand2_IN   => ALU1_Operand2_DE_out,
+        ALU1_Operand1_IN   => ALU1_Operand1_E_in,
+        ALU1_Operand2_IN   => ALU1_Operand2_E_in,
         Two_Operand_Instr1_Flag_IN => Two_Operand_Instr1_Flag_DE_out,
         One_or_Two1_IN     => One_or_Two1_DE_out,
         
@@ -976,8 +1105,8 @@ PORT MAP(
         SET_Carry2_IN      => SET_Carry2_DE_out,
         CLR_Carry2_IN      => CLR_Carry2_DE_out,
         ALU2_OP_Code_IN    => ALU2_OP_Code_DE_out,
-        ALU2_Operand1_IN   => ALU2_Operand1_DE_out,
-        ALU2_Operand2_IN   => ALU2_Operand2_DE_out,
+        ALU2_Operand1_IN   => ALU2_Operand1_E_in,
+        ALU2_Operand2_IN   => ALU2_Operand2_E_in,
         Two_Operand_Instr2_Flag_IN => Two_Operand_Instr2_Flag_DE_out,
         One_or_Two2_IN     => One_or_Two2_DE_out,
         
@@ -1078,6 +1207,9 @@ PORT MAP(
         EXT_CLK           => CLK,
         EXT_INTR          => Interrupt,
 
+        IR1_IN             => IR1_EM_out,           -- OLD Registers ***********
+        IR2_IN             => IR2_EM_out,
+
         PC                => PC_EM_out,
         SP                => SP_EM_out,
 
@@ -1102,7 +1234,9 @@ PORT MAP(
         PC_As_Data2       => PC_As_Data2_EM_out,
 
         ALU2_OUT          => ALU2_Result_EM_out,
-
+        
+        RET1_OUT           => RET1_memory_out,
+        RET2_OUT           => RET2_memory_out,
         Memory_OUT        => Memory_Memory_out
 );
 
@@ -1114,8 +1248,9 @@ Mem_WB_Buffer:
 ENTITY work.BUF
 PORT MAP(
         EXT_CLK   => CLK,
-        EXT_RST   => Buffer_RST,
-	
+        EXT_RST1  => RST_MW_Buffer1,
+	EXT_RST2  => RST_MW_Buffer2,
+
 	Stall     => '0',
         Flush     => '0',
 -------------------------------------------------------------
@@ -1240,14 +1375,15 @@ PORT MAP(
 WriteBack_Stage:
 ENTITY work.WB
 PORT MAP(
+        IR1_IN    =>  IR1_MW_out,
+        IR2_IN    =>  IR2_MW_out,
+
         ALU1      =>  ALU1_Result_MW_out,
         ALU2      =>  ALU2_Result_MW_out,
         SP        =>  SP_MW_out,
         MEM       =>  Memory_Result_MW_out,
         
-        InPort    =>  (others => '0'),  ---------TO BE DONE***********************
-        inS1      =>  '0',              ---------TO BE DONE***********************
-        inS2      =>  '0',              ---------TO BE DONE***********************
+        InPort    =>  pport,
 
         S1        =>  Mem_or_ALU1_MW_out,
         S2        =>  Mem_or_ALU2_MW_out,

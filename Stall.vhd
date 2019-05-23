@@ -56,7 +56,7 @@ PORT MAP(
 );
 
     ------------------------------------------------------------------------IR1------------------------------------------------------------------------
-    IR1_OUT <= (others => '0') when (IR1_PREV(15 DOWNTO 10) = "100100"
+    IR1_OUT <= (others => '0') when IR2_PREV(15 DOWNTO 10) /= "001010" and ( (IR1_PREV(15 DOWNTO 10) = "100100"
     and ( --pop for previous channel 1
         (IR1_CURR(15 DOWNTO 12) = "1000" and IR1_CURR(2 DOWNTO 0) = IR1_PREV(2 DOWNTO 0)) or --not,inc,dec,push
         (IR1_CURR(15 DOWNTO 13) = "110" and (IR1_CURR(5 DOWNTO 3) = IR1_PREV(2 DOWNTO 0) or IR1_CURR(2 DOWNTO 0) = IR1_PREV(2 DOWNTO 0))) or --add,sub,and,or
@@ -104,12 +104,12 @@ PORT MAP(
         (IR1_CURR(15 DOWNTO 10) = "000010" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) or --mov
         (IR1_CURR(15 DOWNTO 13) = "111" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) --shl,shr
         )
-    )
+    ) or ( IR1_CURR(15 DOWNTO 10) = "100011" and ( IR1_PREV(15 DOWNTO 10) = "100011" or IR2_PREV(15 DOWNTO 10) = "100011"  ) ) ) 
     else IR1_CURR;
 
 
     ------------------------------------------------------------------------IR2------------------------------------------------------------------------
-    IR2_OUT <= (others => '0') when (IR1_PREV(15 DOWNTO 10) = "100100"
+    IR2_OUT <= (others => '0') when IR1_CURR(15 DOWNTO 10) /= "001010" and ( (IR1_PREV(15 DOWNTO 10) = "100100"
     and ( --pop for previous channel 1
         (IR2_CURR(15 DOWNTO 12) = "1000" and IR2_CURR(2 DOWNTO 0) = IR1_PREV(2 DOWNTO 0)) or --not,inc,dec,push
         (IR2_CURR(15 DOWNTO 13) = "110" and (IR2_CURR(5 DOWNTO 3) = IR1_PREV(2 DOWNTO 0) or IR2_CURR(2 DOWNTO 0) = IR1_PREV(2 DOWNTO 0))) or --add,sub,and,or
@@ -187,17 +187,23 @@ PORT MAP(
     or (IR1_CURR(15 DOWNTO 10) = "100100" and IR2_CURR(15 DOWNTO 10) = "100011")    --Strucural Hazard [POP -> PUSH]
     or (IR1_CURR(15 DOWNTO 10) = "001011" and IR2_CURR(15 DOWNTO 10) = "001100")    --Strucural Hazard [LDD -> STD]
     or (IR1_CURR(15 DOWNTO 10) = "001100" and IR2_CURR(15 DOWNTO 10) = "001011")    --Strucural Hazard [STD -> LDD]
+
+    or (IR1_CURR(15 DOWNTO 10) = "100011" and IR2_CURR(15 DOWNTO 10) = "100011")    --Strucural Hazard [PUSH -> PUSH]
+    or (IR1_CURR(15 DOWNTO 10) = "100100" and IR2_CURR(15 DOWNTO 10) = "100100")    --Strucural Hazard [POP -> POP]
+    or (IR1_CURR(15 DOWNTO 10) = "001011" and IR2_CURR(15 DOWNTO 10) = "001011")    --Strucural Hazard [LDD -> LDD]
+    or (IR1_CURR(15 DOWNTO 10) = "001100" and IR2_CURR(15 DOWNTO 10) = "001100")    --Strucural Hazard [STD -> STD]
+    
     -- Strucural Hazard:  PUSH or POP or LDD or STD  -> CALL or RET or RTI
     or ( (IR1_CURR(15 DOWNTO 10) = "100011" or IR1_CURR(15 DOWNTO 10) = "100100" or IR1_CURR(15 DOWNTO 10) = "001100" or IR1_CURR(15 DOWNTO 10) = "001011") 
     and (IR2_CURR(15 DOWNTO 10) = "100101" or IR2_CURR(15 DOWNTO 10) = "100110" or IR2_CURR(15 DOWNTO 10) = "100111") )
-
+    or ( IR1_CURR(15 DOWNTO 10) = "100011" and ( IR1_PREV(15 DOWNTO 10) = "100011" or IR2_PREV(15 DOWNTO 10) = "100011"  ) ) ) 
     
     else IR2_CURR;
 
 
 
     ------------------------------------------------------------------------PC------------------------------------------------------------------------
-    PC_OUT <= std_logic_vector(unsigned(PC_IN) + 1) when (IR1_CURR(15 DOWNTO 10) = "100100"              -- Stall 2 times
+    PC_OUT <= std_logic_vector(unsigned(PC_IN) + 1) when IR1_CURR(15 DOWNTO 10) /= "001010" and ( (IR1_CURR(15 DOWNTO 10) = "100100"              -- Stall 2 times
     and ( --pop for previous channel 2
         (IR2_CURR(15 DOWNTO 12) = "1000" and IR2_CURR(2 DOWNTO 0) = IR1_CURR(2 DOWNTO 0)) or --not,inc,dec,push
         (IR2_CURR(15 DOWNTO 13) = "110" and (IR2_CURR(5 DOWNTO 3) = IR1_CURR(2 DOWNTO 0) or IR2_CURR(2 DOWNTO 0) = IR1_CURR(2 DOWNTO 0))) or --add,sub,and,or
@@ -227,11 +233,19 @@ PORT MAP(
     or (IR1_CURR(15 DOWNTO 10) = "100100" and IR2_CURR(15 DOWNTO 10) = "100011")    --Strucural Hazard [POP -> PUSH]
     or (IR1_CURR(15 DOWNTO 10) = "001011" and IR2_CURR(15 DOWNTO 10) = "001100")    --Strucural Hazard [LDD -> STD]
     or (IR1_CURR(15 DOWNTO 10) = "001100" and IR2_CURR(15 DOWNTO 10) = "001011")    --Strucural Hazard [STD -> LDD]
+
+    or (IR1_CURR(15 DOWNTO 10) = "100011" and IR2_CURR(15 DOWNTO 10) = "100011")    --Strucural Hazard [PUSH -> PUSH]
+    or (IR1_CURR(15 DOWNTO 10) = "100100" and IR2_CURR(15 DOWNTO 10) = "100100")    --Strucural Hazard [POP -> POP]
+    or (IR1_CURR(15 DOWNTO 10) = "001011" and IR2_CURR(15 DOWNTO 10) = "001011")    --Strucural Hazard [LDD -> LDD]
+    or (IR1_CURR(15 DOWNTO 10) = "001100" and IR2_CURR(15 DOWNTO 10) = "001100")    --Strucural Hazard [STD -> STD]
+
     -- Strucural Hazard:  PUSH or POP or LDD or STD  -> CALL or RET or RTI
     or ( (IR1_CURR(15 DOWNTO 10) = "100011" or IR1_CURR(15 DOWNTO 10) = "100100" or IR1_CURR(15 DOWNTO 10) = "001100" or IR1_CURR(15 DOWNTO 10) = "001011") 
     and (IR2_CURR(15 DOWNTO 10) = "100101" or IR2_CURR(15 DOWNTO 10) = "100110" or IR2_CURR(15 DOWNTO 10) = "100111") )
+    or ( IR2_CURR(15 DOWNTO 10) = "100011" and ( IR1_PREV(15 DOWNTO 10) = "100011" or IR2_PREV(15 DOWNTO 10) = "100011"  ) )
+    ) 
 
-    else PC_IN when (IR1_PREV(15 DOWNTO 10) = "100100"                 -- Stall 1 time
+    else PC_IN when IR2_PREV(15 DOWNTO 10) /= "001010" and ( (IR1_PREV(15 DOWNTO 10) = "100100"                 -- Stall 1 time
     and ( --pop for previous channel 1
         (IR1_CURR(15 DOWNTO 12) = "1000" and IR1_CURR(2 DOWNTO 0) = IR1_PREV(2 DOWNTO 0)) or --not,inc,dec,push
         (IR1_CURR(15 DOWNTO 13) = "110" and (IR1_CURR(5 DOWNTO 3) = IR1_PREV(2 DOWNTO 0) or IR1_CURR(2 DOWNTO 0) = IR1_PREV(2 DOWNTO 0))) or --add,sub,and,or
@@ -279,7 +293,7 @@ PORT MAP(
         (IR1_CURR(15 DOWNTO 10) = "000010" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) or --mov
         (IR1_CURR(15 DOWNTO 13) = "111" and IR1_CURR(2 DOWNTO 0) = IR2_PREV(5 DOWNTO 3)) --shl,shr
         )
-    ) 
+    ) or ( IR1_CURR(15 DOWNTO 10) = "100011" and ( IR1_PREV(15 DOWNTO 10) = "100011" or IR2_PREV(15 DOWNTO 10) = "100011"  ) ) ) 
     else std_logic_vector(unsigned(PC_IN) + 2);         -- No Stall
 
 
@@ -287,5 +301,6 @@ PORT MAP(
 
 
 end arch_stall;
+
 
 

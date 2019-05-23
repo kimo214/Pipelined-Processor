@@ -9,7 +9,8 @@ ENTITY memory_instr IS
         CLK         : IN  STD_LOGIC;
         Address     : IN  STD_LOGIC_VECTOR(m-1 DOWNTO 0); 
 	Dout1	    : OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0); -- IR1
-	Dout2	    : OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0)  -- IR2
+	Dout2	    : OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);  -- IR2
+    memzero     : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
 END ENTITY;
 
@@ -23,5 +24,6 @@ BEGIN
 	
 	Dout1 <= instruction_memory(TO_INTEGER(UNSIGNED(Address)));   -- IR1
  	Dout2 <= instruction_memory(TO_INTEGER(UNSIGNED(Address))+1); -- IR2
-    
+    memzero <= "0000000000000000" & std_logic_vector(instruction_memory(0)); 
+
 END ARCHITECTURE;

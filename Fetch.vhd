@@ -12,7 +12,8 @@ ENTITY Fetch IS
 	PC_IN			: IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 	IR1	       	 	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0); -- IR1
-	IR2	       	 	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0)  -- IR2
+	IR2	       	 	: OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);  -- IR2
+	memzero_OUT			: OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
     );
 END ENTITY;
 
@@ -33,9 +34,9 @@ PORT MAP(
 	EXT_CLK,
 	PC_IN(m-1 downto 0),
 	mem_data1,
-	mem_data2
+	mem_data2,
+	memzero_OUT
 );
-
 
 IR1 <= mem_data1;
 IR2 <= mem_data2;

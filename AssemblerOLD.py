@@ -30,7 +30,7 @@ OpCode = {
     'JZ':'01000',
     'JN':'01001',
     'JC':'01010',
-    'JMP':'01011',
+    'JMP':'01011'
     }
 
 def GetRegIdx(IDX):
@@ -58,29 +58,10 @@ for L in lines:
     L = L.replace(';',' ')
     L = L.replace('\n','')
     Words = L.split()
-    if(len(Words) == 0):
-        continue
-
     Instruction = Words[0].upper()
-    if Instruction == ".ORG":
-        MEMlocation = int(Words[1])
-        while i != MEMlocation:
-            Out.write(str(i)+': ' + "0" * 16 + '\n')
-            i+=1
-        continue
-
-    try:        #Wrtiting value in the memory.
-        Val = str("{0:b}".format(int(Words[0])))
-        Val = Val.rjust(16,'0')
-        Out.write(str(i)+': ' +Val+'\n')
-        i+=1
-        continue
-    except:
-        pass
-
+    
     if(not OpCode.__contains__(Instruction)):
         continue
-        
     
     IR+=OpCode[Instruction]
     if TwoOp.count(Instruction) > 0:

@@ -39,6 +39,9 @@ SIGNAL RST_EM_Buffer1        : STD_LOGIC := '0';
 SIGNAL RST_EM_Buffer2        : STD_LOGIC := '0';
 SIGNAL RST_MW_Buffer1        : STD_LOGIC := '0';
 SIGNAL RST_MW_Buffer2        : STD_LOGIC := '0';
+
+SIGNAL pc_reset_out          : STD_LOGIC_VECTOR(31 DOWNTO 0);
+
 --------------------------------------------  FETCH TO BUFFER  ----------------------------------------------
 
 signal IR1_Fetch_out, IR2_Fetch_out : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -93,7 +96,7 @@ signal	Rsrc_Idx2_FD_out, Rdst_Idx2_FD_out                				    : STD_LOGIC_VEC
 				
 signal	Enable_SP2_FD_out, Enable_Reg2_FD_out, Mem_or_ALU2_FD_out			: STD_LOGIC;             
 
-
+SIGNAL memoryzero : STD_LOGIC_VECTOR(15 downto 0);
 --------------------------------------------------------------------------------------------------------------     
 --------------------------------------------   Decode TO Buffer  ----------------------------------------------
 
@@ -390,7 +393,7 @@ GENERIC MAP(n => 32)
 PORT MAP(
 	Reg_CLK  => CLK,
 	Reg_RST  => Register_RST,
-	RST_val  => (others => '0'),
+	RST_val  => pc_reset_out,
 	EN       => '1',           
 	Din      => PC_Register_IN,
 
@@ -435,7 +438,8 @@ PORT MAP(
 
         PC_IN             => PC_Register_OUT,
         IR1               => IR1_Fetch_out,
-        IR2               => IR2_Fetch_out
+        IR2               => IR2_Fetch_out,
+        memzero_OUT       => pc_reset_out
 );
 
 --=============================================================
@@ -685,8 +689,8 @@ PORT MAP(
 	Stall     => '0',
         Flush     => '0',
 -------------------------------------------------------
-        IR1_IN    => IR1_FD_out,           -- OLD Registers ***********
-        IR2_IN    => IR2_FD_out,
+        IR1_IN    => IR1_Stall_out,           -- OLD Registers ***********
+        IR2_IN    => IR2_Stall_out,
         PC_IN     => PC_FD_out,
         SP_IN     => SP_FD_out,
         Flags_IN  => Flag_Register_OUT,
@@ -898,14 +902,14 @@ ALU1_Operand1_E_in <= ALU2_Result_EM_out when (First_op1last2='1' and ALU_Forwar
 else ALU1_Result_EM_out when (First_op1last1='1' and ALU_Forwarding1last1='1') 
 else ALU2_Result_MW_out when (First_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
 else ALU1_Result_MW_out when (First_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
-else Memory_Result_MW_out when ((FstOpMem1last1='1' and MemForward1last1='1') or (FstOpMem1last2='1' and MemForward1last2='1'))
+else "0000000000000000" & Memory_Result_MW_out(31 downto 16) when ((FstOpMem1last1='1' and MemForward1last1='1') or (FstOpMem1last2='1' and MemForward1last2='1'))
 else ALU1_Operand1_DE_out;
 
 ALU1_Operand2_E_in <= ALU2_Result_EM_out when (Second_op1last2='1' and ALU_Forwarding1last2='1')
 else ALU1_Result_EM_out when (Second_op1last1='1' and ALU_Forwarding1last1='1') 
 else ALU2_Result_MW_out when (Second_op1lastlast2='1' and ALU_Forwarding1lastlast2='1')
 else ALU1_Result_MW_out when (Second_op1lastlast1='1' and ALU_Forwarding1lastlast1='1')
-else Memory_Result_MW_out when ((ScndOpMem1last1='1' and MemForward1last1='1') or (ScndOpMem1last2='1' and MemForward1last2='1'))
+else "0000000000000000" & Memory_Result_MW_out(31 downto 16) when ((ScndOpMem1last1='1' and MemForward1last1='1') or (ScndOpMem1last2='1' and MemForward1last2='1'))
 else ALU1_Operand2_DE_out;
 
 
@@ -999,14 +1003,14 @@ ALU2_Operand1_E_in <= ALU2_Result_EM_out when (First_op2last2='1' and ALU_Forwar
 else ALU1_Result_EM_out when (First_op2last1='1' and ALU_Forwarding2last1='1')
 else ALU2_Result_MW_out when (First_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
 else ALU1_Result_MW_out when (First_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
-else Memory_Result_MW_out when ((FstOpMem2last1='1' and MemForward2last1='1') or (FstOpMem2last2='1' and MemForward2last2='1'))
+else "0000000000000000" & Memory_Result_MW_out(31 downto 16) when ((FstOpMem2last1='1' and MemForward2last1='1') or (FstOpMem2last2='1' and MemForward2last2='1'))
 else ALU2_Operand1_DE_out;
 
 ALU2_Operand2_E_in <= ALU2_Result_EM_out when (Second_op2last2='1' and ALU_Forwarding2last2='1')
 else ALU1_Result_EM_out when (Second_op2last1='1' and ALU_Forwarding2last1='1')
 else ALU2_Result_MW_out when (Second_op2lastlast2='1' and ALU_Forwarding2lastlast2='1')
 else ALU1_Result_MW_out when (Second_op2lastlast1='1' and ALU_Forwarding2lastlast1='1')
-else Memory_Result_MW_out when ((ScndOpMem2last1='1' and MemForward2last1='1') or (ScndOpMem2last2='1' and MemForward2last2='1'))
+else "0000000000000000" & Memory_Result_MW_out(31 downto 16) when ((ScndOpMem2last1='1' and MemForward2last1='1') or (ScndOpMem2last2='1' and MemForward2last2='1'))
 else ALU2_Operand2_DE_out;
 
 
@@ -1021,7 +1025,7 @@ PORT MAP(
 
         IR1_IN              => IR1_DE_out,
         IR2_IN              => IR2_DE_out,
-
+        SP                  => SP_Register_OUT,
         IR1_IN_NXT          => IR1_FD_out,                       -- IR1 of the next packet
         INPUT_PORT          => pport,
 ---------------------------------------------------------------
@@ -1082,7 +1086,7 @@ PORT MAP(
         IR1_IN             => IR1_DE_out,           -- OLD Registers ***********
         IR2_IN             => IR2_DE_out,
         PC_IN              => PC_DE_out,
-        SP_IN              => SP_DE_out,
+        SP_IN              => SP_Register_OUT,
         Flags_IN           => Flag_Register_OUT,
 ---------------------------------------------------------        
         NOP1_IN            => NOP1_DE_out,
